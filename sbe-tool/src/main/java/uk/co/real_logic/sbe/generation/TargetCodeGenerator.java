@@ -16,6 +16,9 @@
 package uk.co.real_logic.sbe.generation;
 
 import org.agrona.generation.PackageOutputManager;
+
+import uk.co.real_logic.sbe.generation.c.CGenerator;
+import uk.co.real_logic.sbe.generation.c.DirectoryOutputManager;
 import uk.co.real_logic.sbe.generation.cpp.CppGenerator;
 import uk.co.real_logic.sbe.generation.cpp.NamespaceOutputManager;
 import uk.co.real_logic.sbe.generation.java.JavaGenerator;
@@ -50,8 +53,15 @@ public enum TargetCodeGenerator
         {
             return new CppGenerator(ir, new NamespaceOutputManager(outputDir, ir.applicableNamespace()));
         }
-    };
-
+    },
+	
+	C()
+	{
+    	public CodeGenerator newInstance(final Ir ir, final String outputDir) throws IOException
+        {
+            return new CGenerator(ir, new DirectoryOutputManager(outputDir));
+        }
+	};
 
     /**
      * Get a new {@link CodeGenerator} for the given target language.
