@@ -8,8 +8,8 @@ import org.agrona.MutableDirectBuffer;
 public class VarDataEncodingEncoder
 {
     public static final int ENCODED_LENGTH = -1;
-    private MutableDirectBuffer buffer;
     private int offset;
+    private MutableDirectBuffer buffer;
 
     public VarDataEncodingEncoder wrap(final MutableDirectBuffer buffer, final int offset)
     {
@@ -19,9 +19,29 @@ public class VarDataEncodingEncoder
         return this;
     }
 
+    public MutableDirectBuffer buffer()
+    {
+        return buffer;
+    }
+
+    public int offset()
+    {
+        return offset;
+    }
+
     public int encodedLength()
     {
         return ENCODED_LENGTH;
+    }
+
+    public static int lengthEncodingOffset()
+    {
+        return 0;
+    }
+
+    public static int lengthEncodingLength()
+    {
+        return 2;
     }
 
     public static int lengthNullValue()
@@ -46,6 +66,16 @@ public class VarDataEncodingEncoder
     }
 
 
+    public static int varDataEncodingOffset()
+    {
+        return 2;
+    }
+
+    public static int varDataEncodingLength()
+    {
+        return -1;
+    }
+
     public static short varDataNullValue()
     {
         return (short)255;
@@ -60,6 +90,7 @@ public class VarDataEncodingEncoder
     {
         return (short)254;
     }
+
     public String toString()
     {
         return appendTo(new StringBuilder(100)).toString();

@@ -205,6 +205,8 @@ public class IrGenerator
             .name(type.name())
             .offset(currOffset)
             .size(type.encodedLength())
+            .version(type.sinceVersion())
+            .description(type.description())
             .encoding(new Encoding.Builder()
                 .semanticType(semanticTypeOf(type, field))
                 .build());
@@ -227,19 +229,19 @@ public class IrGenerator
 
             if (elementType instanceof EncodedDataType)
             {
-                add((EncodedDataType) elementType, offset, field);
+                add((EncodedDataType)elementType, offset, null);
             }
             else if (elementType instanceof EnumType)
             {
-                add((EnumType) elementType, offset, field);
+                add((EnumType)elementType, offset, null);
             }
-            else if (elementType instanceof  SetType)
+            else if (elementType instanceof SetType)
             {
-                add((SetType) elementType, offset, field);
+                add((SetType)elementType, offset, null);
             }
             else if (elementType instanceof CompositeType)
             {
-                add((CompositeType) elementType, offset, field);
+                add((CompositeType)elementType, offset, null);
             }
 
             offset += elementType.encodedLength();
@@ -266,6 +268,8 @@ public class IrGenerator
             .name(type.name())
             .size(encodingType.size())
             .offset(offset)
+            .version(type.sinceVersion())
+            .description(type.description())
             .encoding(encodingBuilder.build());
 
         if (field != null)
@@ -278,7 +282,7 @@ public class IrGenerator
 
         for (final EnumType.ValidValue validValue : type.validValues())
         {
-            add(validValue, encodingType, field);
+            add(validValue, encodingType);
         }
 
         builder.signal(Signal.END_ENUM);
@@ -286,22 +290,18 @@ public class IrGenerator
         tokenList.add(builder.build());
     }
 
-    private void add(final EnumType.ValidValue value, final PrimitiveType encodingType, final Field field)
+    private void add(final EnumType.ValidValue value, final PrimitiveType encodingType)
     {
         final Token.Builder builder = new Token.Builder()
             .signal(Signal.VALID_VALUE)
             .name(value.name())
+            .version(value.sinceVersion())
+            .description(value.description())
             .encoding(new Encoding.Builder()
                 .byteOrder(byteOrder)
                 .primitiveType(encodingType)
                 .constValue(value.primitiveValue())
                 .build());
-
-        if (field != null)
-        {
-            builder.version(field.sinceVersion());
-            builder.description(field.description());
-        }
 
         tokenList.add(builder.build());
     }
@@ -315,6 +315,8 @@ public class IrGenerator
             .name(type.name())
             .size(encodingType.size())
             .offset(offset)
+            .version(type.sinceVersion())
+            .description(type.description())
             .encoding(new Encoding.Builder()
                 .semanticType(semanticTypeOf(type, field))
                 .primitiveType(encodingType)
@@ -330,7 +332,7 @@ public class IrGenerator
 
         for (final SetType.Choice choice : type.choices())
         {
-            add(choice, encodingType, field);
+            add(choice, encodingType);
         }
 
         builder.signal(Signal.END_SET);
@@ -338,21 +340,18 @@ public class IrGenerator
         tokenList.add(builder.build());
     }
 
-    private void add(final SetType.Choice value, final PrimitiveType encodingType, final Field field)
+    private void add(final SetType.Choice value, final PrimitiveType encodingType)
     {
         final Token.Builder builder = new Token.Builder()
             .signal(Signal.CHOICE)
             .name(value.name())
+            .description(value.description())
+            .version(value.sinceVersion())
             .encoding(new Encoding.Builder()
                 .constValue(value.primitiveValue())
                 .byteOrder(byteOrder)
                 .primitiveType(encodingType)
                 .build());
-
-        if (field != null)
-        {
-            builder.version(field.sinceVersion());
-        }
 
         tokenList.add(builder.build());
     }

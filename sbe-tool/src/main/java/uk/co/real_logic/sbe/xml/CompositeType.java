@@ -45,7 +45,6 @@ public class CompositeType extends Type
 
     private final List<String> compositesPath = new ArrayList<>();
     private final Map<String, Type> containedTypeByNameMap = new LinkedHashMap<>();
-    private final int sinceVersion;
 
     public CompositeType(final Node node) throws XPathExpressionException
     {
@@ -68,7 +67,6 @@ public class CompositeType extends Type
         this.compositesPath.addAll(compositesPath);
         this.compositesPath.add(getAttributeValue(node, "name"));
 
-        sinceVersion = Integer.parseInt(XmlSchemaParser.getAttributeValue(node, "sinceVersion", "0"));
         final XPath xPath = XPathFactory.newInstance().newXPath();
         final NodeList list = (NodeList)xPath.compile(SUB_TYPES_EXP).evaluate(node, NODESET);
 
@@ -122,19 +120,9 @@ public class CompositeType extends Type
     }
 
     /**
-     * Return the sinceVersion value of the {@link CompositeType}
+     * Return list of the {@link Type}s that compose this composite
      *
-     * @return the sinceVersion of the {@link CompositeType}
-     */
-    public int sinceVersion()
-    {
-        return sinceVersion;
-    }
-
-    /**
-     * Return list of the Type that compose this composite
-     *
-     * @return {@link List} that holds the types in this composite
+     * @return {@link List} that holds the {@link Type}s in this composite
      */
     public List<Type> getTypeList()
     {

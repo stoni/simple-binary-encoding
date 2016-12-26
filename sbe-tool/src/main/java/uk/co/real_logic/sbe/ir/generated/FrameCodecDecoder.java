@@ -45,6 +45,11 @@ public class FrameCodecDecoder
         return "";
     }
 
+    public DirectBuffer buffer()
+    {
+        return buffer;
+    }
+
     public int offset()
     {
         return offset;
@@ -85,6 +90,16 @@ public class FrameCodecDecoder
     public static int irIdSinceVersion()
     {
         return 0;
+    }
+
+    public static int irIdEncodingOffset()
+    {
+        return 0;
+    }
+
+    public static int irIdEncodingLength()
+    {
+        return 4;
     }
 
     public static String irIdMetaAttribute(final MetaAttribute metaAttribute)
@@ -130,6 +145,16 @@ public class FrameCodecDecoder
         return 0;
     }
 
+    public static int irVersionEncodingOffset()
+    {
+        return 4;
+    }
+
+    public static int irVersionEncodingLength()
+    {
+        return 4;
+    }
+
     public static String irVersionMetaAttribute(final MetaAttribute metaAttribute)
     {
         switch (metaAttribute)
@@ -171,6 +196,16 @@ public class FrameCodecDecoder
     public static int schemaVersionSinceVersion()
     {
         return 0;
+    }
+
+    public static int schemaVersionEncodingOffset()
+    {
+        return 8;
+    }
+
+    public static int schemaVersionEncodingLength()
+    {
+        return 4;
     }
 
     public static String schemaVersionMetaAttribute(final MetaAttribute metaAttribute)
@@ -458,6 +493,7 @@ public class FrameCodecDecoder
         return value;
     }
 
+
     public String toString()
     {
         return appendTo(new StringBuilder(100)).toString();
@@ -472,9 +508,9 @@ public class FrameCodecDecoder
         builder.append("|sbeSchemaId=");
         builder.append(SCHEMA_ID);
         builder.append("|sbeSchemaVersion=");
-        if (actingVersion != SCHEMA_VERSION)
+        if (parentMessage.actingVersion != SCHEMA_VERSION)
         {
-            builder.append(actingVersion);
+            builder.append(parentMessage.actingVersion);
             builder.append('/');
         }
         builder.append(SCHEMA_VERSION);
