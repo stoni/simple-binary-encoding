@@ -41,21 +41,23 @@ import uk.co.real_logic.sbe.ir.Ir;
 import uk.co.real_logic.sbe.ir.Signal;
 import uk.co.real_logic.sbe.ir.Token;
 
-public class CGenerator implements CodeGenerator {
-	private static final String BASE_INDENT = "";
+public class CGenerator implements CodeGenerator
+{
+    private static final String BASE_INDENT = "";
     private static final String INDENT = "    ";
 
     private final Ir ir;
     private final OutputManager outputManager;
 
-    public CGenerator(final Ir ir, final OutputManager outputManager) throws IOException {
+    public CGenerator(final Ir ir, final OutputManager outputManager) throws IOException
+    {
         Verify.notNull(ir, "ir");
         Verify.notNull(outputManager, "outputManager");
 
         this.ir = ir;
         this.outputManager = outputManager;
     }
-    
+
     public void generateMessageHeaderStub() throws IOException
     {
         final String messageHeader = "message_header";
@@ -414,13 +416,13 @@ public class CGenerator implements CodeGenerator {
                 sb, className, token, propertyName, characterEncoding, lengthToken, lengthOfLengthField, lengthCppType, indent);
 
             sb.append(String.format(
-                indent + "    const char *%1$s(void)\n" +
-                indent + "    {\n" +
+                indent + "const char *%1$s(void)\n" +
+                indent + "{\n" +
                     "%2$s" +
-                indent + "         const char *fieldPtr = (m_buffer + position() + %3$d);\n" +
-                indent + "         position(position() + %3$d + *((%4$s *)(m_buffer + position())));\n" +
-                indent + "         return fieldPtr;\n" +
-                indent + "    }\n\n",
+                indent + "     const char *fieldPtr = (m_buffer + position() + %3$d);\n" +
+                indent + "     position(position() + %3$d + *((%4$s *)(m_buffer + position())));\n" +
+                indent + "     return fieldPtr;\n" +
+                indent + "}\n\n",
                 formatFunctionName(propertyName),
                 generateTypeFieldNotPresentCondition(token.version(), BASE_INDENT),
                 lengthOfLengthField,
@@ -428,20 +430,20 @@ public class CGenerator implements CodeGenerator {
             ));
 
             sb.append(String.format(
-                indent + "    std::uint64_t get%1$s(char *dst, const std::uint64_t length)\n" +
-                indent + "    {\n" +
+                indent + "uint64_t get_%1$s(char *dst, const uint64_t length)\n" +
+                indent + "{\n" +
                     "%2$s" +
-                indent + "        std::uint64_t lengthOfLengthField = %3$d;\n" +
-                indent + "        std::uint64_t lengthPosition = position();\n" +
-                indent + "        position(lengthPosition + lengthOfLengthField);\n" +
-                indent + "        std::uint64_t dataLength = %4$s(*((%5$s *)(m_buffer + lengthPosition)));\n" +
-                indent + "        std::uint64_t bytesToCopy = (length < dataLength) ? length : dataLength;\n" +
-                indent + "        std::uint64_t pos = position();\n" +
-                indent + "        position(position() + dataLength);\n" +
-                indent + "        std::memcpy(dst, m_buffer + pos, bytesToCopy);\n" +
-                indent + "        return bytesToCopy;\n" +
-                indent + "    }\n\n",
-                propertyName,
+                indent + "    uint64_t lengthOfLengthField = %3$d;\n" +
+                indent + "    uint64_t lengthPosition = position();\n" +
+                indent + "    position(lengthPosition + lengthOfLengthField);\n" +
+                indent + "    uint64_t dataLength = %4$s(*((%5$s *)(m_buffer + lengthPosition)));\n" +
+                indent + "    uint64_t bytesToCopy = (length < dataLength) ? length : dataLength;\n" +
+                indent + "    uint64_t pos = position();\n" +
+                indent + "    position(position() + dataLength);\n" +
+                indent + "    memcpy(dst, m_buffer + pos, bytesToCopy);\n" +
+                indent + "    return bytesToCopy;\n" +
+                indent + "}\n\n",
+                fromCamelCaseToUnderscore(propertyName),
                 generateArrayFieldNotPresentCondition(token.version(), BASE_INDENT),
                 lengthOfLengthField,
                 formatByteOrderEncoding(lengthToken.encoding().byteOrder(), lengthToken.encoding().primitiveType()),
@@ -449,38 +451,38 @@ public class CGenerator implements CodeGenerator {
             ));
 
             sb.append(String.format(
-                indent + "    %5$s &put%1$s(const char *src, const %3$s length)\n" +
-                indent + "    {\n" +
-                indent + "        std::uint64_t lengthOfLengthField = %2$d;\n" +
-                indent + "        std::uint64_t lengthPosition = position();\n" +
-                indent + "        position(lengthPosition + lengthOfLengthField);\n" +
-                indent + "        *((%3$s *)(m_buffer + lengthPosition)) = %4$s(length);\n" +
-                indent + "        std::uint64_t pos = position();\n" +
-                indent + "        position(position() + length);\n" +
-                indent + "        std::memcpy(m_buffer + pos, src, length);\n" +
-                indent + "        return *this;\n" +
-                indent + "    }\n\n",
-                propertyName,
+                indent + "void put_%1$s(const char *src, const %3$s length, %5$s_t **target)\n" +
+                indent + "{\n" +
+                indent + "    uint64_t lengthOfLengthField = %2$d;\n" +
+                indent + "    uint64_t lengthPosition = position();\n" +
+                indent + "    position(lengthPosition + lengthOfLengthField);\n" +
+                indent + "    *((%3$s *)(m_buffer + lengthPosition)) = %4$s(length);\n" +
+                indent + "    uint64_t pos = position();\n" +
+                indent + "    position(position() + length);\n" +
+                indent + "    memcpy(m_buffer + pos, src, length);\n" +
+                indent + "    return *this;\n" +
+                indent + "}\n\n",
+                fromCamelCaseToUnderscore(propertyName),
                 lengthOfLengthField,
                 lengthCppType,
                 formatByteOrderEncoding(lengthToken.encoding().byteOrder(), lengthToken.encoding().primitiveType()),
-                className
+                fromCamelCaseToUnderscore(className)
             ));
 
             sb.append(String.format(
-                indent + "    const std::string get%1$sAsString()\n" +
-                indent + "    {\n" +
+                indent + "void get_%1$s_as_string(char **str)\n" +
+                indent + "{\n" +
                 "%2$s" +
-                indent + "        std::uint64_t lengthOfLengthField = %3$d;\n" +
-                indent + "        std::uint64_t lengthPosition = position();\n" +
-                indent + "        position(lengthPosition + lengthOfLengthField);\n" +
-                indent + "        std::uint64_t dataLength = %4$s(*((%5$s *)(m_buffer + lengthPosition)));\n" +
-                indent + "        std::uint64_t pos = position();\n" +
-                indent + "        const std::string result(m_buffer + pos, dataLength);\n" +
-                indent + "        position(position() + dataLength);\n" +
-                indent + "        return result;\n" +
-                indent + "    }\n\n",
-                propertyName,
+                indent + "    uint64_t lengthOfLengthField = %3$d;\n" +
+                indent + "    uint64_t lengthPosition = position();\n" +
+                indent + "    position(lengthPosition + lengthOfLengthField);\n" +
+                indent + "    uint64_t dataLength = %4$s(*((%5$s *)(m_buffer + lengthPosition)));\n" +
+                indent + "    uint64_t pos = position();\n" +
+                indent + "    char *result(m_buffer + pos, dataLength);\n" +
+                indent + "    position(position() + dataLength);\n" +
+                indent + "    *str = result;\n" +
+                indent + "}\n\n",
+                fromCamelCaseToUnderscore(propertyName),
                 generateStringNotPresentCondition(token.version(), BASE_INDENT),
                 lengthOfLengthField,
                 formatByteOrderEncoding(lengthToken.encoding().byteOrder(), lengthToken.encoding().primitiveType()),
@@ -488,23 +490,22 @@ public class CGenerator implements CodeGenerator {
             ));
 
             sb.append(String.format(
-                indent + "    %1$s &put%2$s(const std::string& str)\n" +
-                indent + "    {\n" +
-                indent + "        if (str.length() > %6$d)\n" +
-                indent + "        {\n" +
-                indent + "             throw std::runtime_error(\"std::string length too long for length type [E109]\");\n" +
-                indent + "        }\n" +
-                indent + "        std::uint64_t lengthOfLengthField = %3$d;\n" +
-                indent + "        std::uint64_t lengthPosition = position();\n" +
-                indent + "        position(lengthPosition + lengthOfLengthField);\n" +
-                indent + "        *((%4$s *)(m_buffer + lengthPosition)) = %5$s((%4$s)str.length());\n" +
-                indent + "        std::uint64_t pos = position();\n" +
-                indent + "        position(position() + str.length());\n" +
-                indent + "        std::memcpy(m_buffer + pos, str.c_str(), str.length());\n" +
-                indent + "        return *this;\n" +
-                indent + "    }\n",
-                className,
-                propertyName,
+                indent + "void put_%2$s(const char *str, %1$s_t **target)\n" +
+                indent + "{\n" +
+                indent + "    if (str.length() > %6$d) {\n" +
+                indent + "         /* FIXME: error handling (string length too long for length type [E109]) */\n" +
+                indent + "    }\n" +
+                indent + "    uint64_t lengthOfLengthField = %3$d;\n" +
+                indent + "    uint64_t lengthPosition = position();\n" +
+                indent + "    position(lengthPosition + lengthOfLengthField);\n" +
+                indent + "    *((%4$s *)(m_buffer + lengthPosition)) = %5$s((%4$s)str.length());\n" +
+                indent + "    uint64_t pos = position();\n" +
+                indent + "    position(position() + str.length());\n" +
+                indent + "    memcpy(m_buffer + pos, str.c_str(), str.length());\n" +
+                indent + "    return *this;\n" +
+                indent + "}\n",
+                fromCamelCaseToUnderscore(className),
+                fromCamelCaseToUnderscore(propertyName),
                 lengthOfLengthField,
                 lengthCppType,
                 formatByteOrderEncoding(lengthToken.encoding().byteOrder(), lengthToken.encoding().primitiveType()),
@@ -571,12 +572,12 @@ public class CGenerator implements CodeGenerator {
 
         sb.append(String.format(
             "\n" +
-            indent + "    %4$s %1$sLength(void) const\n" +
-            indent + "    {\n" +
+            indent + "%4$s %1$s_length(void) const\n" +
+            indent + "{\n" +
             "%2$s" +
-            indent + "        return %3$s(*((%4$s *)(m_buffer + position())));\n" +
-            indent + "    }\n\n",
-            toLowerFirstChar(propertyName),
+            indent + "    return %3$s(*((%4$s *)(m_buffer + position())));\n" +
+            indent + "}\n\n",
+            fromCamelCaseToUnderscore(toLowerFirstChar(propertyName)),
             generateArrayFieldNotPresentCondition(token.version(), BASE_INDENT),
             formatByteOrderEncoding(lengthToken.encoding().byteOrder(), lengthToken.encoding().primitiveType()),
             lengthCppType
@@ -586,8 +587,9 @@ public class CGenerator implements CodeGenerator {
     private void generateChoiceSet(final List<Token> tokens) throws IOException
     {
         final String bitSetName = formatStructName(tokens.get(0).name());
+        final String filename = fromCamelCaseToUnderscore(tokens.get(0).name());
 
-        try (Writer out = outputManager.createOutput(bitSetName))
+        try (Writer out = outputManager.createOutput(filename))
         {
             out.append(generateFileHeader(ir.namespaces(), bitSetName, null));
             out.append(generateFixedFlyweightCode(bitSetName, tokens.get(0).encodedLength()));
@@ -604,7 +606,7 @@ public class CGenerator implements CodeGenerator {
             ));
 
             out.append(generateChoices(bitSetName, tokens.subList(1, tokens.size() - 1)));
-            out.append(CUtil.closingBraces(ir.namespaces().length)).append("#endif\n");
+            out.append("#endif\n");
         }
     }
 
@@ -612,34 +614,35 @@ public class CGenerator implements CodeGenerator {
     {
         final Token enumToken = tokens.get(0);
         final String enumName = formatStructName(tokens.get(0).name());
+        final String filename = fromCamelCaseToUnderscore(tokens.get(0).name());
 
-        try (Writer out = outputManager.createOutput(enumName))
+        try (Writer out = outputManager.createOutput(filename))
         {
             out.append(generateFileHeader(ir.namespaces(), enumName, null));
-            out.append(generateEnumDeclaration(enumName));
 
-            out.append(generateEnumValues(tokens.subList(1, tokens.size() - 1), enumToken));
+            out.append(generateEnumValues(tokens.get(0).name(), tokens.subList(1, tokens.size() - 1), enumToken));
 
             out.append(generateEnumLookupMethod(tokens.subList(1, tokens.size() - 1), enumToken));
 
-            out.append("};\n");
-            out.append(CUtil.closingBraces(ir.namespaces().length)).append("#endif\n");
+            out.append("#endif\n");
         }
     }
 
     private void generateComposite(final List<Token> tokens) throws IOException
     {
-        final String compositeName = formatStructName(tokens.get(0).name());
+        final String compositeStructName = formatStructName(tokens.get(0).name());
+        final String compositeName = fromCamelCaseToUnderscore(tokens.get(0).name());
+        final String filename = fromCamelCaseToUnderscore(tokens.get(0).name());
 
-        try (Writer out = outputManager.createOutput(compositeName))
+        try (Writer out = outputManager.createOutput(filename))
         {
-            out.append(generateFileHeader(ir.namespaces(), compositeName,
+            out.append(generateFileHeader(ir.namespaces(), compositeStructName,
                 generateTypesToIncludes(tokens.subList(1, tokens.size() - 1))));
             out.append(generateFixedFlyweightCode(compositeName, tokens.get(0).encodedLength()));
 
             out.append(generateCompositePropertyElements(compositeName, tokens.subList(1, tokens.size() - 1), BASE_INDENT));
 
-            out.append(CUtil.closingBraces(ir.namespaces().length)).append("#endif\n");
+            out.append("#endif\n");
         }
     }
 
@@ -708,29 +711,29 @@ public class CGenerator implements CodeGenerator {
         return sb;
     }
 
-    private CharSequence generateEnumValues(final List<Token> tokens, final Token encodingToken)
+    private CharSequence generateEnumValues(final String name, final List<Token> tokens, final Token encodingToken)
     {
         final StringBuilder sb = new StringBuilder();
         final Encoding encoding = encodingToken.encoding();
 
-        sb.append(
-            "    enum Value \n" +
-            "    {\n"
-        );
+        sb.append(String.format(
+            "typedef enum sbe_%1$s_e {\n",
+            fromCamelCaseToUnderscore(name)
+        ));
 
         for (final Token token : tokens)
         {
             final CharSequence constVal = generateLiteral(
                 token.encoding().primitiveType(), token.encoding().constValue().toString());
-            sb.append("        ").append(token.name()).append(" = ").append(constVal).append(",\n");
+            sb.append("    ").append(token.name()).append(" = ").append(constVal).append(",\n");
         }
 
         sb.append(String.format(
-            "        NULL_VALUE = %1$s",
+            "    NULL_VALUE = %1$s",
             generateLiteral(encoding.primitiveType(), encoding.applicableNullValue().toString())
         ));
 
-        sb.append("\n    };\n\n");
+        sb.append(String.format("\n} sbe_%1$s_t;\n\n", fromCamelCaseToUnderscore(name)));
 
         return sb;
     }
@@ -738,31 +741,33 @@ public class CGenerator implements CodeGenerator {
     private static CharSequence generateEnumLookupMethod(final List<Token> tokens, final Token encodingToken)
     {
         final String enumName = formatStructName(encodingToken.name());
+        final String funcNamePart = fromCamelCaseToUnderscore(encodingToken.name());
         final StringBuilder sb = new StringBuilder();
 
         sb.append(String.format(
-            "    static %1$s::Value get(const %2$s value)\n" +
-            "    {\n" +
-            "        switch (value)\n" +
-            "        {\n",
+            "%1$s sbe_get_%3$s(%2$s value)\n" +
+            "{\n" +
+            "    switch (value)\n" +
+            "    {\n",
             enumName,
-            cppTypeName(tokens.get(0).encoding().primitiveType())
+            cppTypeName(tokens.get(0).encoding().primitiveType()),
+            funcNamePart
         ));
 
         for (final Token token : tokens)
         {
             sb.append(String.format(
-                "            case %1$s: return %2$s;\n",
+                "        case %1$s: return %2$s;\n",
                 token.encoding().constValue().toString(),
                 token.name())
             );
         }
 
         sb.append(String.format(
-            "            case %1$s: return NULL_VALUE;\n" +
-            "        }\n\n" +
-            "        throw std::runtime_error(\"unknown value for enum %2$s [E103]\");\n" +
-            "    }\n",
+            "        case %1$s: return NULL_VALUE;\n" +
+            "    }\n\n" +
+            "    /* FIXME: (\"unknown value for enum %2$s [E103]\"); */\n" +
+            "}\n",
             encodingToken.encoding().applicableNullValue().toString(),
             enumName
         ));
@@ -837,19 +842,24 @@ public class CGenerator implements CodeGenerator {
         final List<String> typesToInclude)
     {
         final StringBuilder sb = new StringBuilder();
+        String includeName = fromCamelCaseToUnderscore(className).toUpperCase();
+        if (!className.toLowerCase().startsWith("sbe_"))
+        {
+            includeName = "SBE_" + includeName;
+        }
 
         sb.append("/* Generated SBE (Simple Binary Encoding) message codec */\n");
 
         sb.append(String.format(
-            "#ifndef SBE_%1$s_H_\n" +
-            "#define SBE_%1$s_H_\n\n" +
-            
+            "#ifndef %1$s_H_\n" +
+            "#define %1$s_H_\n\n" +
+
             "/* math.h needed for NAN */\n" +
             "#include <math.h>\n" +
             "#define SBE_FLOAT_NAN NAN\n" +
             "#define SBE_DOUBLE_NAN NAN\n" +
             "#include <sbe.h>\n\n",
-            fromCamelCaseToUnderscore(className).toUpperCase()));
+            includeName));
 
         if (typesToInclude != null)
         {
@@ -863,11 +873,6 @@ public class CGenerator implements CodeGenerator {
         }
 
         return sb;
-    }
-
-    private static CharSequence generateEnumDeclaration(final String name)
-    {
-        return "class " + name + "\n{\npublic:\n\n";
     }
 
     private CharSequence generateCompositePropertyElements(
@@ -941,7 +946,8 @@ public class CGenerator implements CodeGenerator {
         return "";
     }
 
-    private CharSequence generatePrimitiveFieldMetaData(final String className, final String propertyName, final Token token, final String indent)
+    private CharSequence generatePrimitiveFieldMetaData(final String className, final String propertyName,
+                                                        final Token token, final String indent)
     {
         final StringBuilder sb = new StringBuilder();
 
@@ -1203,13 +1209,14 @@ public class CGenerator implements CodeGenerator {
     private static CharSequence generateFixedFlyweightCode(final String className, final int size)
     {
         return String.format(
-        	"typedef struct sbe_%1$s_s {\n" +
+            "typedef struct sbe_%1$s_s {\n" +
             "    char *buffer;\n" +
             "    uint64_t bufferLength;\n" +
             "    uint64_t offset;\n" +
             "    uint64_t actingVersion;\n" +
             "} sbe_%1$s_t;\n\n" +
-            "static int sbe_%1$s_reset(sbe_%1$s_t *message_header, char *buffer, const uint64_t offset, const uint64_t buffer_length, " +
+            "static int sbe_%1$s_reset(sbe_%1$s_t *message_header, char *buffer, const uint64_t offset, " +
+                    "const uint64_t buffer_length, " +
             " const uint64_t acting_version)\n" +
             "{\n" +
             "    if (SBE_BOUNDS_CHECK_EXPECT(((offset + %2$s) > buffer_length), 0))\n" +
@@ -1260,7 +1267,8 @@ public class CGenerator implements CodeGenerator {
             "    %1$s->offset = 0;\n" +
             "    sbe_%1$s_reset(%1$s, buffer, 0, buffer_length, sbe_block_length(), sbe_schema_version());\n" +
             "}\n" +
-            "int sbe_%1$s_new(char *buffer, uint64_t buffer_length, uint64_t acting_block_length, uint64_t acting_version, sbe_%1$s_t **%1$s)\n" +
+            "int sbe_%1$s_new(char *buffer, uint64_t buffer_length, uint64_t acting_block_length, " +
+                    "uint64_t acting_version, sbe_%1$s_t **%1$s)\n" +
             "{\n" +
             "    %1$s->buffer = NULL;\n" +
             "    %1$s->buffer_length = 0;\n" +
@@ -1420,7 +1428,8 @@ public class CGenerator implements CodeGenerator {
                         break;
 
                     case BEGIN_ENUM:
-                        sb.append(generateEnumProperty(containingClassName, signalToken, propertyName, encodingToken, indent));
+                        sb.append(generateEnumProperty(containingClassName, signalToken,
+                                propertyName, encodingToken, indent));
                         break;
 
                     case BEGIN_SET:
@@ -1437,7 +1446,8 @@ public class CGenerator implements CodeGenerator {
         return sb;
     }
 
-    private static void generateFieldMetaAttributeMethod(final StringBuilder sb, final String className, final Token token, final String indent)
+    private static void generateFieldMetaAttributeMethod(final StringBuilder sb, final String className,
+                                                         final Token token, final String indent)
     {
         final Encoding encoding = token.encoding();
         final String epoch = encoding.epoch() == null ? "" : encoding.epoch();

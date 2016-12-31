@@ -55,14 +55,14 @@ public enum TargetCodeGenerator
             return new CppGenerator(ir, new NamespaceOutputManager(outputDir, ir.applicableNamespace()));
         }
     },
-	
-	C()
-	{
-    	public CodeGenerator newInstance(final Ir ir, final String outputDir) throws IOException
+
+    C()
+    {
+        public CodeGenerator newInstance(final Ir ir, final String outputDir) throws IOException
         {
             return new CGenerator(ir, new DirectoryOutputManager(outputDir));
         }
-	};
+    };
 
     /**
      * Get a new {@link CodeGenerator} for the given target language.

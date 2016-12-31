@@ -27,19 +27,21 @@ import java.io.Writer;
 import org.agrona.Verify;
 import org.agrona.generation.OutputManager;
 
-public class DirectoryOutputManager implements OutputManager {
+public class DirectoryOutputManager implements OutputManager
+{
 
-	private final File outputDir;
-	
-	/**
+    private final File outputDir;
+
+    /**
      * Create a new {@link OutputManager} for generating C 89 source files into a given package.
      *
      * @param baseDirectoryName for the generated source code.
      * @throws IOException if an error occurs during output
      */
-    public DirectoryOutputManager(final String baseDirectoryName) throws IOException {
+    public DirectoryOutputManager(final String baseDirectoryName) throws IOException
+    {
         Verify.notNull(baseDirectoryName, "baseDirectoryName");
-        
+
         final String dirName =
             (baseDirectoryName.endsWith("" + separatorChar) ? baseDirectoryName : baseDirectoryName + separatorChar);
 
@@ -49,7 +51,7 @@ public class DirectoryOutputManager implements OutputManager {
             throw new IllegalStateException("Unable to create directory: " + dirName);
         }
     }
-	
+
     /**
      * Create a new output which will be a C 89 source file in the given directory.
      *
@@ -59,9 +61,10 @@ public class DirectoryOutputManager implements OutputManager {
      * @param name the name of the C header filename.
      * @return a {@link java.io.Writer} to which the source code should be written.
      */
-	public Writer createOutput(String name) throws IOException {
-		final File targetFile = new File(outputDir, name + ".h");
+    public Writer createOutput(String name) throws IOException
+    {
+        final File targetFile = new File(outputDir, name + ".h");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
-	}
+    }
 
 }

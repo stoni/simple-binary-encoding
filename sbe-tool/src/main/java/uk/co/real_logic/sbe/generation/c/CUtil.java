@@ -23,8 +23,9 @@ import uk.co.real_logic.sbe.PrimitiveType;
 import uk.co.real_logic.sbe.SbeTool;
 import uk.co.real_logic.sbe.util.ValidationUtil;
 
-public class CUtil {
-	private static Map<PrimitiveType, String> typeNameByPrimitiveTypeMap = new EnumMap<>(PrimitiveType.class);
+public class CUtil
+{
+    private static Map<PrimitiveType, String> typeNameByPrimitiveTypeMap = new EnumMap<>(PrimitiveType.class);
 
     static
     {
@@ -73,29 +74,33 @@ public class CUtil {
     {
         return Character.toLowerCase(str.charAt(0)) + str.substring(1);
     }
-    
+
     public static String fromCamelCaseToUnderscore(final String str)
     {
-    	StringBuilder tmp = new StringBuilder();
-    	for (int i = 0; i < str.length(); i++) {
-    		if (Character.isUpperCase(str.charAt(i))) {
-    			if (i > 0) {
-    				tmp.append('_');
-    			}
-    			tmp.append(Character.toLowerCase(str.charAt(i)));
-    		}
-    		else {
-    			tmp.append(str.charAt(i));
-    		} 
-    	}
-    	return tmp.toString();
+        final StringBuilder tmp = new StringBuilder();
+        for (int i = 0; i < str.length(); i++)
+        {
+            if (Character.isUpperCase(str.charAt(i)))
+            {
+                if (i > 0)
+                {
+                    tmp.append('_');
+                }
+                tmp.append(Character.toLowerCase(str.charAt(i)));
+            }
+            else
+            {
+                tmp.append(str.charAt(i));
+            }
+        }
+        return tmp.toString();
     }
 
     public static String formatStructName(final String value)
     {
-    	return "sbe_"+value+"_t";
+        return "sbe_" + fromCamelCaseToUnderscore(value) + "_t";
     }
-    
+
     /**
      * Format a String as a function name.
      *
