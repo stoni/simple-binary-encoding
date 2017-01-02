@@ -63,7 +63,7 @@ public class DirectoryOutputManager implements OutputManager
      */
     public Writer createOutput(String name) throws IOException
     {
-        final File targetFile = new File(outputDir, name + ".h");
+        final File targetFile = new File(outputDir, name);
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile), "UTF-8"));
     }
 

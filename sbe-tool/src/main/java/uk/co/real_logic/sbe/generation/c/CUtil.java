@@ -41,14 +41,18 @@ public class CUtil
         typeNameByPrimitiveTypeMap.put(PrimitiveType.FLOAT, "float");
         typeNameByPrimitiveTypeMap.put(PrimitiveType.DOUBLE, "double");
     }
-
-    /**
-     * Map the name of a {@link uk.co.real_logic.sbe.PrimitiveType} to a C++98 primitive type name.
-     *
-     * @param primitiveType to map.
-     * @return the name of the Java primitive that most closely maps.
-     */
-    public static String cppTypeName(final PrimitiveType primitiveType)
+    
+    public static String whitespaces(int num)
+    {
+    	StringBuffer s = new StringBuffer();
+    	for (int i = 0; i < num; i++)
+    	{
+    		s.append(' ');
+    	}
+    	return s.toString();
+    }
+    
+    public static String cTypeName(final PrimitiveType primitiveType)
     {
         return typeNameByPrimitiveTypeMap.get(primitiveType);
     }
@@ -73,6 +77,11 @@ public class CUtil
     public static String toLowerFirstChar(final String str)
     {
         return Character.toLowerCase(str.charAt(0)) + str.substring(1);
+    }
+    
+    public static String dotsToUnderscore(final String str)
+    {
+    	return str.replaceAll("\\.", "_");
     }
 
     public static String fromCamelCaseToUnderscore(final String str)
