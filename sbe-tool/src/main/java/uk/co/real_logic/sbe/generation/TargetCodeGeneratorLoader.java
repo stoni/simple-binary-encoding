@@ -20,6 +20,8 @@ import uk.co.real_logic.sbe.generation.cpp.CppGenerator;
 import uk.co.real_logic.sbe.generation.cpp.NamespaceOutputManager;
 import uk.co.real_logic.sbe.generation.golang.GolangGenerator;
 import uk.co.real_logic.sbe.generation.golang.GolangOutputManager;
+import uk.co.real_logic.sbe.generation.c.DirectoryOutputManager;
+import uk.co.real_logic.sbe.generation.c.CGenerator;
 import uk.co.real_logic.sbe.generation.java.JavaGenerator;
 import uk.co.real_logic.sbe.ir.Ir;
 
@@ -41,6 +43,14 @@ public enum TargetCodeGeneratorLoader implements TargetCodeGenerator
                 Boolean.getBoolean(JAVA_GENERATE_INTERFACES),
                 Boolean.getBoolean(DECODE_UNKNOWN_ENUM_VALUES),
                 new PackageOutputManager(outputDir, ir.applicableNamespace()));
+        }
+    },
+	
+	C()
+    {
+        public CodeGenerator newInstance(final Ir ir, final String outputDir) throws IOException
+        {
+            return new CGenerator(ir, new DirectoryOutputManager(outputDir));
         }
     },
 
