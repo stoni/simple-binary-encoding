@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,8 @@ public class IrEncoder implements AutoCloseable
             tokenEncoder.putMaxValue(valArray, 0, put(valBuffer, encoding.maxValue(), type));
             tokenEncoder.putNullValue(valArray, 0, put(valBuffer, encoding.nullValue(), type));
 
-            final byte[] charEncodingBytes = getBytes(encoding.characterEncoding(), characterEncodingCharacterEncoding());
+            final byte[] charEncodingBytes = getBytes(
+                encoding.characterEncoding(), characterEncodingCharacterEncoding());
             tokenEncoder.putCharacterEncoding(charEncodingBytes, 0, charEncodingBytes.length);
 
             final byte[] epochBytes = getBytes(encoding.epoch(), epochCharacterEncoding());
@@ -193,6 +194,9 @@ public class IrEncoder implements AutoCloseable
 
             final byte[] descriptionBytes = getBytes(token.description(), descriptionCharacterEncoding());
             tokenEncoder.putDescription(descriptionBytes, 0, descriptionBytes.length);
+
+            final byte[] referencedNameBytes = getBytes(token.referencedName(), referencedNameCharacterEncoding());
+            tokenEncoder.putReferencedName(referencedNameBytes, 0, referencedNameBytes.length);
         }
         catch (final UnsupportedEncodingException ex)
         {

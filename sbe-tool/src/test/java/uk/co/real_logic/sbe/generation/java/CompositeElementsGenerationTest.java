@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,8 @@ public class CompositeElementsGenerationTest
         final MsgDecoder msgDecoder = new MsgDecoder();
 
         hdrDecoder.wrap(decodeBuffer, 0);
-        msgDecoder.wrap(decodeBuffer, hdrDecoder.encodedLength(), MSG_ENCODER.sbeBlockLength(), MSG_ENCODER.sbeSchemaVersion());
+        msgDecoder.wrap(
+            decodeBuffer, hdrDecoder.encodedLength(), MSG_ENCODER.sbeBlockLength(), MSG_ENCODER.sbeSchemaVersion());
 
         assertThat(hdrDecoder.blockLength(), is(22));
         assertThat(hdrDecoder.templateId(), is(1));

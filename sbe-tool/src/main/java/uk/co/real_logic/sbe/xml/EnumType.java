@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,19 +49,21 @@ public class EnumType extends Type
 
     public EnumType(final Node node) throws XPathExpressionException
     {
-        this(node, null);
+        this(node, null, null);
     }
 
     /**
      * Construct a new enumType from XML Schema.
      *
-     * @param node      from the XML Schema Parsing
-     * @param givenName for the node.
+     * @param node           from the XML Schema Parsing
+     * @param givenName      for the node.
+     * @param referencedName of the type when created from a ref in a composite.
      * @throws XPathExpressionException if the XPath is invalid
      */
-    public EnumType(final Node node, final String givenName) throws XPathExpressionException
+    public EnumType(final Node node, final String givenName, final String referencedName)
+        throws XPathExpressionException
     {
-        super(node, givenName);
+        super(node, givenName, referencedName);
 
         final XPath xPath = XPathFactory.newInstance().newXPath();
         final String encodingTypeStr = getAttributeValue(node, "encodingType");
@@ -81,9 +83,9 @@ public class EnumType extends Type
 
             default:
                 // might not have ran into this type yet, so look for it
-                final Node encodingTypeNode =
-                    (Node)xPath.compile(String.format("%s[@name=\'%s\']", XmlSchemaParser.TYPE_XPATH_EXPR, encodingTypeStr))
-                        .evaluate(node.getOwnerDocument(), XPathConstants.NODE);
+                final Node encodingTypeNode = (Node)xPath.compile(
+                    String.format("%s[@name=\'%s\']", XmlSchemaParser.TYPE_XPATH_EXPR, encodingTypeStr))
+                    .evaluate(node.getOwnerDocument(), XPathConstants.NODE);
 
                 if (null == encodingTypeNode)
                 {
@@ -225,6 +227,7 @@ public class EnumType extends Type
         private final String description;
         private final PrimitiveValue value;
         private final int sinceVersion;
+        private final int deprecated;
 
         /**
          * Construct a ValidValue given the XML node and the encodingType.
@@ -238,6 +241,7 @@ public class EnumType extends Type
             description = getAttributeValueOrNull(node, "description");
             value = PrimitiveValue.parse(node.getFirstChild().getNodeValue(), encodingType);
             sinceVersion = Integer.parseInt(getAttributeValue(node, "sinceVersion", "0"));
+            deprecated = Integer.parseInt(getAttributeValue(node, "deprecated", "0"));
 
             checkForValidName(node, name);
         }
@@ -280,6 +284,16 @@ public class EnumType extends Type
         public int sinceVersion()
         {
             return sinceVersion;
+        }
+
+        /**
+         * Version in which {@link ValidValue} was deprecated. Only valid if greater than zero.
+         *
+         * @return version in which the {@link ValidValue} was deprecated.
+         */
+        public int deprecated()
+        {
+            return deprecated;
         }
     }
 }

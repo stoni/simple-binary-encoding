@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import uk.co.real_logic.sbe.ir.generated.TokenCodecDecoder;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -91,13 +92,13 @@ public class IrDecoder implements AutoCloseable
         }
 
         int i = 0;
-
         if (tokens.get(0).signal() == Signal.BEGIN_COMPOSITE)
         {
-            i = captureHeader(tokens, 0);
+            i = captureHeader(tokens);
         }
 
-        final Ir ir = new Ir(irPackageName, irNamespaceName, irId, irVersion, semanticVersion, irHeader);
+        final ByteOrder byteOrder = tokens.size() > 0 ? tokens.get(0).encoding().byteOrder() : null;
+        final Ir ir = new Ir(irPackageName, irNamespaceName, irId, irVersion, semanticVersion, byteOrder, irHeader);
 
         for (int size = tokens.size(); i < size; i++)
         {
@@ -110,10 +111,11 @@ public class IrDecoder implements AutoCloseable
         return ir;
     }
 
-    private int captureHeader(final List<Token> tokens, int index)
+    private int captureHeader(final List<Token> tokens)
     {
         final List<Token> headerTokens = new ArrayList<>();
 
+        int index = 0;
         Token token = tokens.get(index);
         headerTokens.add(token);
         do
@@ -128,27 +130,28 @@ public class IrDecoder implements AutoCloseable
         return index;
     }
 
-    private static int captureMessage(final List<Token> tokens, int index, final Ir ir)
+    private static int captureMessage(final List<Token> tokens, final int index, final Ir ir)
     {
         final List<Token> messageTokens = new ArrayList<>();
 
-        Token token = tokens.get(index);
+        int i = index;
+        Token token = tokens.get(i);
         messageTokens.add(token);
         do
         {
-            token = tokens.get(++index);
+            token = tokens.get(++i);
             messageTokens.add(token);
         }
         while (Signal.END_MESSAGE != token.signal());
 
-        ir.addMessage(tokens.get(index).id(), messageTokens);
+        ir.addMessage(tokens.get(i).id(), messageTokens);
 
-        return index;
+        return i;
     }
 
     private void decodeFrame()
     {
-        frameDecoder.wrap(directBuffer, offset, frameDecoder.sbeBlockLength(), 0);
+        frameDecoder.wrap(directBuffer, offset, frameDecoder.sbeBlockLength(), FrameCodecDecoder.SCHEMA_VERSION);
 
         irId = frameDecoder.irId();
 
@@ -180,7 +183,7 @@ public class IrDecoder implements AutoCloseable
         final Token.Builder tokenBuilder = new Token.Builder();
         final Encoding.Builder encBuilder = new Encoding.Builder();
 
-        tokenDecoder.wrap(directBuffer, offset, tokenDecoder.sbeBlockLength(), 0);
+        tokenDecoder.wrap(directBuffer, offset, tokenDecoder.sbeBlockLength(), TokenCodecDecoder.SCHEMA_VERSION);
 
         tokenBuilder
             .offset(tokenDecoder.tokenOffset())
@@ -218,6 +221,9 @@ public class IrDecoder implements AutoCloseable
 
         final String description = tokenDecoder.description();
         tokenBuilder.description(description.isEmpty() ? null : description);
+
+        final String referencedName = tokenDecoder.referencedName();
+        tokenBuilder.referencedName(referencedName.isEmpty() ? null : referencedName);
 
         offset += tokenDecoder.encodedLength();
 

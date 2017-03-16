@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static uk.co.real_logic.sbe.xml.XmlSchemaParser.*;
  */
 public class Field
 {
-    public static final int INVALID_ID = Integer.MAX_VALUE;  // schemaId must only be short, so this is way out of range.
+    public static final int INVALID_ID = Integer.MAX_VALUE;  // schemaId must be a short, so this is way out of range.
 
     private final String name;                 // required for field/data & group
     private final String description;          // optional for field/data & group
@@ -40,8 +40,9 @@ public class Field
     private final CompositeType dimensionType; // required for group (not present for field/data)
     private final boolean variableLength;      // true for data (false for field/group)
     private final int sinceVersion;            // optional
+    private final int deprecated;              // optional
     private List<Field> groupFieldList;        // used by group fields as the list of child fields in the group
-    private int computedOffset;                // holds the calculated offset of this field from top level <message> or <group>
+    private int computedOffset;                // holds the calculated offset of this field from <message> or <group>
     private int computedBlockLength;           // used to hold the calculated block length of this group
     private final String epoch;                // optional, epoch from which a timestamps start, defaults to "unix"
     private final String timeUnit;             // optional, defaults to "nanosecond".
@@ -59,6 +60,7 @@ public class Field
         final CompositeType dimensionType,
         final boolean variableLength,
         final int sinceVersion,
+        final int deprecated,
         final String epoch,
         final String timeUnit)
     {
@@ -74,6 +76,7 @@ public class Field
         this.dimensionType = dimensionType;
         this.variableLength = variableLength;
         this.sinceVersion = sinceVersion;
+        this.deprecated = deprecated;
         this.groupFieldList = null;
         this.computedOffset = 0;
         this.computedBlockLength = 0;
@@ -83,7 +86,9 @@ public class Field
 
     public void validate(final Node node)
     {
-        if (type != null && semanticType != null && type.semanticType() != null && !semanticType.equals(type.semanticType()))
+        if (type != null && semanticType != null &&
+            type.semanticType() != null &&
+            !semanticType.equals(type.semanticType()))
         {
             handleError(node, "Mismatched semanticType on type and field: " + name);
         }
@@ -101,7 +106,8 @@ public class Field
                 final int periodIndex = valueRef.indexOf('.');
                 if (periodIndex < 1 || periodIndex == (valueRef.length() - 1))
                 {
-                    handleError(node, "valueRef format not valid for constant (enum-name.valid-value-name): " + valueRef);
+                    handleError(
+                        node, "valueRef format not valid for constant (enum-name.valid-value-name): " + valueRef);
                 }
 
                 final String valueRefType = valueRef.substring(0, periodIndex);
@@ -170,7 +176,7 @@ public class Field
         return blockLength;
     }
 
-    public void computedBlockLength(int length)
+    public void computedBlockLength(final int length)
     {
         computedBlockLength = length;
     }
@@ -210,6 +216,11 @@ public class Field
         return sinceVersion;
     }
 
+    public int deprecated()
+    {
+        return deprecated;
+    }
+
     public String epoch()
     {
         return epoch;
@@ -235,6 +246,7 @@ public class Field
             ", dimensionType=" + dimensionType +
             ", variableLength=" + variableLength +
             ", sinceVersion=" + sinceVersion +
+            ", deprecated=" + deprecated +
             ", groupFieldList=" + groupFieldList +
             ", computedOffset=" + computedOffset +
             ", computedBlockLength=" + computedBlockLength +
@@ -257,6 +269,7 @@ public class Field
         private CompositeType dimensionType;
         private boolean variableLength;
         private int sinceVersion = 0;
+        private int deprecated = 0;
         private String epoch;
         private String timeUnit;
 
@@ -332,6 +345,12 @@ public class Field
             return this;
         }
 
+        public Builder deprecated(final int deprecated)
+        {
+            this.deprecated = deprecated;
+            return this;
+        }
+
         public Builder epoch(final String epoch)
         {
             this.epoch = epoch;
@@ -359,6 +378,7 @@ public class Field
                 dimensionType,
                 variableLength,
                 sinceVersion,
+                deprecated,
                 epoch,
                 timeUnit);
         }

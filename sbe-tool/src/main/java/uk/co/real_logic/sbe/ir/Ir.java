@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.agrona.Verify;
 
 import uk.co.real_logic.sbe.SbeTool;
 
+import java.nio.ByteOrder;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ public class Ir
     private final int id;
     private final int version;
     private final String semanticVersion;
+    private final ByteOrder byteOrder;
 
     private final HeaderStructure headerStructure;
     private final Map<Long, List<Token>> messagesByIdMap = new HashMap<>();
@@ -48,6 +50,7 @@ public class Ir
      * @param id              identifier for the schema.
      * @param version         of the schema
      * @param semanticVersion semantic version for mapping to the application domain.
+     * @param byteOrder       byte order for all types in the schema.
      * @param headerTokens    representing the message headerStructure.
      */
     public Ir(
@@ -56,6 +59,7 @@ public class Ir
         final int id,
         final int version,
         final String semanticVersion,
+        final ByteOrder byteOrder,
         final List<Token> headerTokens)
     {
         Verify.notNull(packageName, "packageName");
@@ -66,7 +70,10 @@ public class Ir
         this.id = id;
         this.version = version;
         this.semanticVersion = semanticVersion;
+        this.byteOrder = byteOrder;
         this.headerStructure = new HeaderStructure(new ArrayList<>(headerTokens));
+
+        captureTypes(headerTokens, 0, headerTokens.size() - 1);
 
         if (Boolean.getBoolean(SbeTool.CPP_NAMESPACES_COLLAPSE))
         {
@@ -208,6 +215,16 @@ public class Ir
     }
 
     /**
+     * {@link ByteOrder} for all types in the schema.
+     *
+     * @return {@link ByteOrder} for all types in the schema.
+     */
+    public ByteOrder byteOrder()
+    {
+        return byteOrder;
+    }
+
+    /**
      * Get the namespaceName to be used for generated code.
      *
      * If {@link #namespaceName} is null then {@link #packageName} is used.
@@ -305,21 +322,22 @@ public class Ir
         }
     }
 
-    private int captureType(final List<Token> tokens, int index, final Signal endSignal, final String name)
+    private int captureType(final List<Token> tokens, final int index, final Signal endSignal, final String name)
     {
         final List<Token> typeTokens = new ArrayList<>();
 
-        Token token = tokens.get(index);
+        int i = index;
+        Token token = tokens.get(i);
         typeTokens.add(token);
         do
         {
-            token = tokens.get(++index);
+            token = tokens.get(++i);
             typeTokens.add(token);
         }
         while (endSignal != token.signal() || !name.equals(token.name()));
 
         typesByNameMap.put(name, typeTokens);
 
-        return index;
+        return i;
     }
 }

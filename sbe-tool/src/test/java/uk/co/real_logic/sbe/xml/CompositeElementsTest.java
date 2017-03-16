@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ public class CompositeElementsTest
     public void shouldParseSchemaSuccessfully()
         throws Exception
     {
-        final MessageSchema schema = parse(TestUtil.getLocalResource("composite-elements-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(TestUtil.getLocalResource(
+            "composite-elements-schema.xml"), ParserOptions.DEFAULT);
         final List<Field> fields = schema.getMessage(1).fields();
         final Field composite = fields.get(0);
 

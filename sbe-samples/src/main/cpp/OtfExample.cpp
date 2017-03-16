@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,7 +315,7 @@ static char MANUFACTURER_CODE[] = { '1', '2', '3' };
 static const char *FUEL_FIGURES_1_USAGE_DESCRIPTION = "Urban Cycle";
 static const char *FUEL_FIGURES_2_USAGE_DESCRIPTION = "Combined Cycle";
 static const char *FUEL_FIGURES_3_USAGE_DESCRIPTION = "Highway Cycle";
-static const char *MAKE = "Honda";
+static const char *MANUFACTURER = "Honda";
 static const char *MODEL = "Civic VTi";
 static const char *ACTIVATION_CODE = "deadbeef";
 
@@ -417,7 +417,7 @@ std::uint64_t encodeHdrAndCar(char *buffer, std::uint64_t length)
         .next().mph(perf2bMph).seconds(perf2bSeconds)
         .next().mph(perf2cMph).seconds(perf2cSeconds);
 
-    car.putMake(MAKE, static_cast<int>(strlen(MAKE)))
+    car.putManufacturer(MANUFACTURER, static_cast<int>(strlen(MANUFACTURER)))
         .putModel(MODEL, static_cast<int>(strlen(MODEL)))
         .putActivationCode(ACTIVATION_CODE, static_cast<int>(strlen(ACTIVATION_CODE)));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,20 @@ public abstract class Type
     private final Presence presence;
     private final String description;
     private final int sinceVersion;
+    private final int deprecated;
     private final String semanticType;
+    private final String referencedName;
 
     private int offsetAttribute;
 
     /**
      * Construct a new Type from XML Schema. Called by subclasses to mostly set common fields
      *
-     * @param node      from the XML Schema Parsing
-     * @param givenName of this node, if null then the attributed name will be used.
+     * @param node           from the XML Schema Parsing
+     * @param givenName      of this node, if null then the attributed name will be used.
+     * @param referencedName of the type when created from a ref in a composite.
      */
-    public Type(final Node node, final String givenName)
+    public Type(final Node node, final String givenName, final String referencedName)
     {
         if (null == givenName)
         {
@@ -50,9 +53,12 @@ public abstract class Type
             name = givenName;
         }
 
+        this.referencedName = referencedName;
+
         presence = Presence.get(getAttributeValue(node, "presence", "required"));
         description = getAttributeValueOrNull(node, "description");
         sinceVersion = Integer.parseInt(getAttributeValue(node, "sinceVersion", "0"));
+        deprecated = Integer.parseInt(getAttributeValue(node, "deprecated", "0"));
         semanticType = getAttributeValueOrNull(node, "semanticType");
         offsetAttribute = Integer.parseInt(getAttributeValue(node, "offset", "-1"));
     }
@@ -64,6 +70,7 @@ public abstract class Type
      * @param presence     of the type
      * @param description  of the type or null
      * @param sinceVersion for the type
+     * @param deprecated   version in which this was deprecated.
      * @param semanticType of the type or null
      */
     public Type(
@@ -71,14 +78,17 @@ public abstract class Type
         final Presence presence,
         final String description,
         final int sinceVersion,
+        final int deprecated,
         final String semanticType)
     {
         this.name = name;
         this.presence = presence;
         this.description = description;
         this.sinceVersion = sinceVersion;
+        this.deprecated = deprecated;
         this.semanticType = semanticType;
         this.offsetAttribute = -1;
+        this.referencedName = null;
     }
 
     /**
@@ -89,6 +99,16 @@ public abstract class Type
     public String name()
     {
         return name;
+    }
+
+    /**
+     * Get the name of the type field is from a reference.
+     *
+     * @return the name of the type field is from a reference.
+     */
+    public String referencedName()
+    {
+        return referencedName;
     }
 
     /**
@@ -103,7 +123,7 @@ public abstract class Type
 
     /**
      * The encodedLength (in octets) of the Type.
-     * <p>
+     *
      * Overridden by subtypes. This returns 0 by default.
      *
      * @return encodedLength of the type in octets
@@ -128,6 +148,16 @@ public abstract class Type
     public int sinceVersion()
     {
         return sinceVersion;
+    }
+
+    /**
+     * Version in which type was deprecated. Only valid if greater than zero.
+     *
+     * @return version in which the type was deprecated.
+     */
+    public int deprecated()
+    {
+        return deprecated;
     }
 
     /**

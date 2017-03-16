@@ -7,6 +7,15 @@
                    description="Example schema"
                    byteOrder="littleEndian">
     <types>
+        <composite name="BoosterT">
+            <enum name="BoostType" encodingType="char">
+                <validValue name="TURBO">T</validValue>
+                <validValue name="SUPERCHARGER">S</validValue>
+                <validValue name="NITROUS">N</validValue>
+                <validValue name="KERS">K</validValue>
+            </enum>
+            <type name="horsePower" primitiveType="uint8"/>
+        </composite>
         <composite name="messageHeader" description="Message identifiers and length of message root">
             <type name="blockLength" primitiveType="uint16"/>
             <type name="templateId" primitiveType="uint16"/>
@@ -27,22 +36,13 @@
         <type name="VehicleCode" primitiveType="char" length="6" characterEncoding="ASCII"/>
         <type name="someNumbers" primitiveType="int32" length="5"/>
         <type name="Ron" primitiveType="uint8" minValue="90" maxValue="110"/>
-        <composite name="Booster">
-            <enum name="BoostType" encodingType="char">
-                <validValue name="TURBO">T</validValue>
-                <validValue name="SUPERCHARGER">S</validValue>
-                <validValue name="NITROUS">N</validValue>
-                <validValue name="KERS">K</validValue>
-            </enum>
-            <type name="horsePower" primitiveType="uint8"/>
-        </composite>
         <composite name="Engine">
             <type name="capacity" primitiveType="uint16"/>
             <type name="numCylinders" primitiveType="uint8"/>
             <type name="maxRpm" primitiveType="uint16" presence="constant">9000</type>
             <type name="manufacturerCode" primitiveType="char" length="3"/>
             <type name="fuel" primitiveType="char" presence="constant">Petrol</type>
-            <ref name="booster" type="Booster"/>
+            <ref name="booster" type="BoosterT"/>
         </composite>
         <enum name="BooleanType" encodingType="uint8">
             <validValue name="F">0</validValue>
@@ -81,7 +81,7 @@
                 <field name="seconds" id="17" type="float"/>
             </group>
         </group>
-        <data name="make" id="18" type="varDataEncoding"/>
+        <data name="manufacturer" id="18" type="varDataEncoding"/>
         <data name="model" id="19" type="varDataEncoding"/>
         <data name="activationCode" id="20" type="varDataEncoding"/>
     </sbe:message>

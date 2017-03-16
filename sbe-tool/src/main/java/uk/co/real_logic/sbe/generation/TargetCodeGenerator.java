@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,10 @@ import uk.co.real_logic.sbe.ir.Ir;
 
 import java.io.IOException;
 
-import static uk.co.real_logic.sbe.SbeTool.*;
-
 /**
  * Target a code generator for a given language.
  */
-public enum TargetCodeGenerator
+public interface TargetCodeGenerator
 {
     JAVA()
     {
@@ -72,24 +70,5 @@ public enum TargetCodeGenerator
      * @return a new instance of a {@link CodeGenerator} for the given target language.
      * @throws IOException if an error occurs when dealing with the output directory.
      */
-    public abstract CodeGenerator newInstance(Ir ir, String outputDir) throws IOException;
-
-    /**
-     * Do a case insensitive lookup of a target language for code generation.
-     *
-     * @param name of the target language to lookup.
-     * @return the {@link TargetCodeGenerator} for the given language name.
-     */
-    public static TargetCodeGenerator get(final String name)
-    {
-        for (final TargetCodeGenerator target : values())
-        {
-            if (target.name().equalsIgnoreCase(name))
-            {
-                return target;
-            }
-        }
-
-        throw new IllegalArgumentException("No code generator for name: " + name);
-    }
+    CodeGenerator newInstance(Ir ir, String outputDir) throws IOException;
 }

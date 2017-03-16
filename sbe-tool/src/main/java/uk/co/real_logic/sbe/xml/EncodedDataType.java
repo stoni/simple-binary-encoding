@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class EncodedDataType extends Type
      */
     public EncodedDataType(final Node node, final String givenName)
     {
-        super(node, givenName);
+        super(node, givenName, null);
 
         primitiveType = PrimitiveType.get(getAttributeValue(node, "primitiveType"));
         length = Integer.parseInt(getAttributeValue(node, "length", "1"));
@@ -142,7 +142,7 @@ public class EncodedDataType extends Type
         final int length,
         final boolean varLen)
     {
-        super(name, presence, description, 0, semanticType);
+        super(name, presence, description, 0, 0, semanticType);
 
         this.primitiveType = primitiveType;
         this.length = length;

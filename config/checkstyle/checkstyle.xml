@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
-    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+        "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
 <module name="Checker">
     <module name="SuppressionFilter">
-        <property name="file" value="config/suppress.xml"/>
+        <property name="file" value="config/checkstyle/suppress.xml"/>
     </module>
+
+    <module name="SuppressWarningsFilter"/>
 
     <module name="SeverityMatchFilter">
         <property name="severity" value="info"/>
@@ -19,11 +21,17 @@
         <property name="tabWidth" value="4"/>
         <property name="severity" value="error"/>
 
+        <module name="SuppressWarningsHolder"/>
+
         <module name="Indentation"/>
 
         <module name="ConstantName"/>
 
-        <module name="FinalLocalVariable"/>
+        <module name="FinalParameters"/>
+
+        <module name="FinalLocalVariable">
+            <property name="validateEnhancedForLoopVariable" value="true"/>
+        </module>
 
         <module name="LocalFinalVariableName"/>
 
@@ -48,13 +56,13 @@
         <module name="UnusedImports"/>
 
         <module name="LineLength">
-            <property name="max" value="130"/>
+            <property name="max" value="120"/>
             <property name="ignorePattern" value="^[ \t]*\*.*@.*$"/>
         </module>
 
         <module name="MethodLength">
             <property name="tokens" value="METHOD_DEF"/>
-            <property name="max" value="130"/>
+            <property name="max" value="100"/>
         </module>
 
         <module name="EmptyForInitializerPad"/>
@@ -64,7 +72,13 @@
         <module name="NoWhitespaceBefore"/>
 
         <module name="WhitespaceAfter">
-            <property name="tokens" value="COMMA, SEMI"/>
+            <property name="tokens"
+                      value="COMMA, SEMI, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE"/>
+        </module>
+
+        <module name="NoWhitespaceAfter">
+            <property name="tokens" value="DOT"/>
+            <property name="allowLineBreaks" value="false"/>
         </module>
 
         <module name="WhitespaceAround">
@@ -98,6 +112,7 @@
 
         <module name="RightCurly">
             <property name="option" value="alone"/>
+            <property name="tokens" value="LITERAL_ELSE, LITERAL_DO, LITERAL_WHILE"/>
         </module>
 
         <module name="EmptyStatement"/>
@@ -120,8 +135,6 @@
 
         <module name="MutableException"/>
 
-        <module name="ArrayTypeStyle"/>
-
         <module name="TodoComment">
             <property name="severity" value="info"/>
             <property name="format" value="TODO"/>
@@ -131,9 +144,9 @@
 
         <module name="IllegalType">
             <property name="legalAbstractClassNames"
-                      value="AbstractBeanDefinition, AbstractAccountEvInstruction, AbstractEmsInstruction, AbstractEvInstruction, AbstractEmsAction, AbstractInstrumentAction, AbstractEntry"/>
+                      value="AbstractBeanDefinition, AbstractEntry"/>
             <property name="illegalClassNames"
-                      value="java.util.GregorianCalendar, java.util.Hashtable, java.util.HashSet, java.util.HashMap, java.util.ArrayList, java.util.LinkedHashSet, java.util.TreeSet, java.util.TreeMap, java.util.Vector"/>
+                      value="java.util.GregorianCalendar, java.util.Vector"/>
         </module>
 
         <module name="DescendantToken">

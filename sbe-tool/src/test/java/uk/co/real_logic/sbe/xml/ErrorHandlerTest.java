@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,8 @@ public class ErrorHandlerTest
         parseTestXmlAddToMap(map, "/types/enum", testXmlString, handler);
         parseTestXmlAddToMap(map, "/types/set", testXmlString, handler);
 
-        assertThat(valueOf(handler.errorCount()), is(valueOf(17)));
-        assertThat(valueOf(handler.warningCount()), is(valueOf(5)));
+        assertThat(valueOf(handler.errorCount()), is(valueOf(3)));
+        assertThat(valueOf(handler.warningCount()), is(valueOf(26)));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class ErrorHandlerTest
         throws Exception
     {
         exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage("had 8 errors");
+        exceptionRule.expectMessage("had 12 warnings");
 
         final ParserOptions options = ParserOptions.builder().suppressOutput(true).warningsFatal(true).build();
 

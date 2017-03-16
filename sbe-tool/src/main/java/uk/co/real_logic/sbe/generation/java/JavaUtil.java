@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,8 @@ public class JavaUtil
          * @param indent           the current generated code indentation
          * @param generatedBuilder the name of the generated StringBuilder to which separator should be added
          */
-        public void appendToGeneratedBuilder(final StringBuilder builder, final String indent, final String generatedBuilder)
+        public void appendToGeneratedBuilder(
+            final StringBuilder builder, final String indent, final String generatedBuilder)
         {
             append(builder, indent, generatedBuilder + ".append('" + symbol + "');");
         }
@@ -72,7 +73,8 @@ public class JavaUtil
         }
     }
 
-    private static final Map<PrimitiveType, String> TYPE_NAME_BY_PRIMITIVE_TYPE_MAP = new EnumMap<>(PrimitiveType.class);
+    private static final Map<PrimitiveType, String> TYPE_NAME_BY_PRIMITIVE_TYPE_MAP =
+        new EnumMap<>(PrimitiveType.class);
 
     static
     {

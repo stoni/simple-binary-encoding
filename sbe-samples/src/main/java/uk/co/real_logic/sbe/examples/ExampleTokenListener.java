@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,8 @@ public class ExampleTokenListener implements TokenListener
         out.println();
     }
 
-    public void onBeginComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
+    public void onBeginComposite(
+        final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
     {
         ++compositeLevel;
 
@@ -158,7 +159,11 @@ public class ExampleTokenListener implements TokenListener
     }
 
     public void onVarData(
-        final Token fieldToken, final DirectBuffer buffer, final int bufferIndex, final int length, final Token typeToken)
+        final Token fieldToken,
+        final DirectBuffer buffer,
+        final int bufferIndex,
+        final int length,
+        final Token typeToken)
     {
         final String value;
         try

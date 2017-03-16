@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,24 +44,26 @@ public final class GenerationUtil
         return collect(Signal.BEGIN_VAR_DATA, tokens, index, varData);
     }
 
-    public static int collect(final Signal signal, final List<Token> tokens, int index, final List<Token> collected)
+    public static int collect(
+        final Signal signal, final List<Token> tokens, final int index, final List<Token> collected)
     {
-        while (index < tokens.size())
+        int i = index;
+        while (i < tokens.size())
         {
-            final Token token = tokens.get(index);
+            final Token token = tokens.get(i);
             if (signal != token.signal())
             {
                 break;
             }
 
             final int tokenCount = token.componentTokenCount();
-            for (final int limit = index + tokenCount; index < limit; index++)
+            for (final int limit = i + tokenCount; i < limit; i++)
             {
-                collected.add(tokens.get(index));
+                collected.add(tokens.get(i));
             }
         }
 
-        return index;
+        return i;
     }
 
     public static List<Token> getMessageBody(final List<Token> tokens)
@@ -69,7 +71,8 @@ public final class GenerationUtil
         return tokens.subList(1, tokens.size() - 1);
     }
 
-    public static CharSequence concatEncodingTokens(final List<Token> tokens, final Function<Token, CharSequence> mapper)
+    public static CharSequence concatEncodingTokens(
+        final List<Token> tokens, final Function<Token, CharSequence> mapper)
     {
         return concatTokens(tokens, Signal.ENCODING, mapper);
     }
@@ -84,7 +87,8 @@ public final class GenerationUtil
             .collect(joining());
     }
 
-    public static int findEndSignal(final List<Token> tokens, final int startIndex, final Signal signal, final String name)
+    public static int findEndSignal(
+        final List<Token> tokens, final int startIndex, final Signal signal, final String name)
     {
         int result = tokens.size() - 1;
 

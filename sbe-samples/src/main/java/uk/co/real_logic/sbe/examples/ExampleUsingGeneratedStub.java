@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class ExampleUsingGeneratedStub
     private static final String ENCODING_FILENAME = "sbe.encoding.filename";
     private static final byte[] VEHICLE_CODE;
     private static final byte[] MANUFACTURER_CODE;
-    private static final byte[] MAKE;
+    private static final byte[] MANUFACTURER;
     private static final byte[] MODEL;
     private static final UnsafeBuffer ACTIVATION_CODE;
 
@@ -45,7 +45,7 @@ public class ExampleUsingGeneratedStub
         {
             VEHICLE_CODE = "abcdef".getBytes(CarEncoder.vehicleCodeCharacterEncoding());
             MANUFACTURER_CODE = "123".getBytes(EngineEncoder.manufacturerCodeCharacterEncoding());
-            MAKE = "Honda".getBytes(CarEncoder.makeCharacterEncoding());
+            MANUFACTURER = "Honda".getBytes(CarEncoder.manufacturerCharacterEncoding());
             MODEL = "Civic VTi".getBytes(CarEncoder.modelCharacterEncoding());
             ACTIVATION_CODE = new UnsafeBuffer("abcdef".getBytes(CarEncoder.activationCodeCharacterEncoding()));
         }
@@ -135,6 +135,8 @@ public class ExampleUsingGeneratedStub
             .capacity(2000)
             .numCylinders((short)4)
             .putManufacturerCode(MANUFACTURER_CODE, srcOffset)
+            .efficiency((byte)35)
+            .boosterEnabled(BooleanType.T)
             .booster().boostType(BoostType.NITROUS).horsePower((short)200);
 
         car.fuelFiguresCount(3)
@@ -156,9 +158,9 @@ public class ExampleUsingGeneratedStub
             .next().mph(60).seconds(7.1f)
             .next().mph(100).seconds(11.8f);
 
-        // An exception will be raised if the string length is larger than can be encoded in the varDataEncoding length field
+        // An exception will be raised if the string length is larger than can be encoded in the varDataEncoding field
         // Please use a suitable schema type for varDataEncoding.length: uint8 <= 254, uint16 <= 65534
-        car.make(new String(MAKE, StandardCharsets.UTF_8))
+        car.manufacturer(new String(MANUFACTURER, StandardCharsets.UTF_8))
             .putModel(MODEL, srcOffset, MODEL.length)
             .putActivationCode(ACTIVATION_CODE, 0, ACTIVATION_CODE.capacity());
 
@@ -215,10 +217,13 @@ public class ExampleUsingGeneratedStub
         {
             sb.append((char)engine.manufacturerCode(i));
         }
+        sb.append("\ncar.engine.efficiency=").append(engine.efficiency());
+        sb.append("\ncar.engine.boosterEnabled=").append(engine.boosterEnabled());
         sb.append("\ncar.engine.booster.boostType=").append(engine.booster().boostType());
         sb.append("\ncar.engine.booster.horsePower=").append(engine.booster().horsePower());
 
-        sb.append("\ncar.engine.fuel=").append(new String(buffer, 0, engine.getFuel(buffer, 0, buffer.length), "ASCII"));
+        sb.append("\ncar.engine.fuel=").append(
+            new String(buffer, 0, engine.getFuel(buffer, 0, buffer.length), "ASCII"));
 
         for (final CarDecoder.FuelFiguresDecoder fuelFigures : car.fuelFigures())
         {
@@ -238,7 +243,7 @@ public class ExampleUsingGeneratedStub
             }
         }
 
-        sb.append("\ncar.make=").append(car.make());
+        sb.append("\ncar.manufacturer=").append(car.manufacturer());
 
         sb.append("\ncar.model=").append(
             new String(buffer, 0, car.getModel(buffer, 0, buffer.length), CarEncoder.modelCharacterEncoding()));

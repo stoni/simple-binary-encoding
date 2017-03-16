@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@
 #include "Token.h"
 
 using namespace sbe::otf;
-using namespace uk::co::real_logic::sbe::ir::generated;
 
 namespace sbe {
 namespace otf {
@@ -164,6 +163,8 @@ private:
 
     int decodeIr()
     {
+        using namespace uk::co::real_logic::sbe::ir::generated;
+
         FrameCodec frame;
         std::uint64_t offset = 0, tmpLen = 0;
         char tmp[256];
@@ -202,6 +203,8 @@ private:
 
     std::uint64_t decodeAndAddToken(std::shared_ptr<std::vector<Token>> tokens, std::uint64_t offset)
     {
+        using namespace uk::co::real_logic::sbe::ir::generated;
+
         TokenCodec tokenCodec;
         tokenCodec.wrapForDecode(m_buffer.get(), offset, tokenCodec.sbeBlockLength(), tokenCodec.sbeSchemaVersion(), m_length);
 
@@ -246,6 +249,9 @@ private:
 
         tmpLen = tokenCodec.getDescription(tmpBuffer, sizeof(tmpBuffer));
         std::string description(tmpBuffer, tmpLen);
+
+        tmpLen = tokenCodec.getReferencedName(tmpBuffer, sizeof(tmpBuffer));
+        std::string referencedName(tmpBuffer, tmpLen);
 
         Encoding encoding(
             type, presence, byteOrder, minValue, maxValue, nullValue, constValue,

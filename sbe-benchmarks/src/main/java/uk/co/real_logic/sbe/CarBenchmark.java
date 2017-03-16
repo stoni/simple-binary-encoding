@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package uk.co.real_logic.sbe;
 import org.openjdk.jmh.annotations.*;
 import org.agrona.concurrent.UnsafeBuffer;
 import uk.co.real_logic.sbe.benchmarks.*;
+import uk.co.real_logic.sbe.benchmarks.CarDecoder.PerformanceFiguresDecoder;
+import uk.co.real_logic.sbe.benchmarks.CarDecoder.PerformanceFiguresDecoder.AccelerationDecoder;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 public class CarBenchmark
 {
-    private static final byte[] MAKE;
+    private static final byte[] MANUFACTURER;
     private static final byte[] MODEL;
     private static final byte[] ENG_MAN_CODE;
     private static final byte[] VEHICLE_CODE;
@@ -33,7 +35,7 @@ public class CarBenchmark
     {
         try
         {
-            MAKE = "MAKE".getBytes(CarEncoder.makeCharacterEncoding());
+            MANUFACTURER = "MANUFACTURER".getBytes(CarEncoder.manufacturerCharacterEncoding());
             MODEL = "MODEL".getBytes(CarEncoder.modelCharacterEncoding());
             ENG_MAN_CODE = "abc".getBytes(EngineEncoder.manufacturerCodeCharacterEncoding());
             VEHICLE_CODE = "abcdef".getBytes(CarEncoder.vehicleCodeCharacterEncoding());
@@ -95,7 +97,10 @@ public class CarBenchmark
     }
 
     public static void encode(
-        final MessageHeaderEncoder messageHeader, final CarEncoder car, final UnsafeBuffer buffer, final int bufferIndex)
+        final MessageHeaderEncoder messageHeader,
+        final CarEncoder car,
+        final UnsafeBuffer buffer,
+        final int bufferIndex)
     {
         messageHeader
             .wrap(buffer, bufferIndex)
@@ -141,7 +146,7 @@ public class CarBenchmark
                    .next().mph(60).seconds(7.1f)
                    .next().mph(100).seconds(11.8f);
 
-        car.putMake(MAKE, 0, MAKE.length);
+        car.putManufacturer(MANUFACTURER, 0, MANUFACTURER.length);
         car.putModel(MODEL, 0, MODEL.length);
     }
 
@@ -196,18 +201,18 @@ public class CarBenchmark
             fuelFigures.mpg();
         }
 
-        for (final CarDecoder.PerformanceFiguresDecoder performanceFigures : car.performanceFigures())
+        for (final PerformanceFiguresDecoder performanceFigures : car.performanceFigures())
         {
             performanceFigures.octaneRating();
 
-            for (final CarDecoder.PerformanceFiguresDecoder.AccelerationDecoder acceleration : performanceFigures.acceleration())
+            for (final AccelerationDecoder acceleration : performanceFigures.acceleration())
             {
                 acceleration.mph();
                 acceleration.seconds();
             }
         }
 
-        car.getMake(tempBuffer, 0, tempBuffer.length);
+        car.getManufacturer(tempBuffer, 0, tempBuffer.length);
         car.getModel(tempBuffer, 0, tempBuffer.length);
     }
 
@@ -239,7 +244,7 @@ public class CarBenchmark
         final long totalDuration = System.nanoTime() - start;
 
         System.out.printf(
-            "%d - %d(ns) average duration for %s.testEncode() - message encodedLength %d\n",
+            "%d - %d(ns) average duration for %s.testEncode() - message encodedLength %d%n",
             runNumber,
             totalDuration / reps,
             benchmark.getClass().getName(),
@@ -261,7 +266,7 @@ public class CarBenchmark
         final long totalDuration = System.nanoTime() - start;
 
         System.out.printf(
-            "%d - %d(ns) average duration for %s.testDecode() - message encodedLength %d\n",
+            "%d - %d(ns) average duration for %s.testDecode() - message encodedLength %d%n",
             runNumber,
             totalDuration / reps,
             benchmark.getClass().getName(),

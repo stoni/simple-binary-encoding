@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,12 +303,17 @@ public class XmlSchemaParser
     {
         if (!ValidationUtil.isSbeCppName(name))
         {
-            handleError(node, "name is not valid for C++: " + name);
+            handleWarning(node, "name is not valid for C++: " + name);
         }
 
         if (!ValidationUtil.isSbeJavaName(name))
         {
-            handleError(node, "name is not valid for Java: " + name);
+            handleWarning(node, "name is not valid for Java: " + name);
+        }
+
+        if (!ValidationUtil.isSbeGolangName(name))
+        {
+            handleWarning(node, "name is not valid for Golang: " + name);
         }
     }
 

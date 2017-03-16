@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ public class CompositeElementsIrTest
     public void shouldGenerateCorrectIrForCompositeElementsSchema()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("composite-elements-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "composite-elements-schema.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
         final List<Token> tokens = ir.getMessage(1);
@@ -97,7 +98,8 @@ public class CompositeElementsIrTest
     public void shouldGenerateCorrectIrForCompositeElementsWithOffsetsSchemaRc4()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("composite-elements-schema-rc4.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "composite-elements-schema-rc4.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
         final List<Token> tokens = ir.getMessage(2);
@@ -152,7 +154,8 @@ public class CompositeElementsIrTest
     public void shouldGenerateCorrectIrForCompositeWithRefSchema()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("composite-elements-schema-rc4.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "composite-elements-schema-rc4.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
         final List<Token> tokens = ir.getMessage(3);

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013-2017 Real Logic Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.co.real_logic.sbe.generation.java;
 
 import org.agrona.concurrent.UnsafeBuffer;
@@ -34,7 +49,7 @@ public class ToStringTest extends EncodedCarTestBase
             "performanceFigures=[" +
             "(octaneRating=95|acceleration=[(mph=30|seconds=4.0),(mph=60|seconds=7.5),(mph=100|seconds=12.2)])," +
             "(octaneRating=99|acceleration=[(mph=30|seconds=3.8),(mph=60|seconds=7.1),(mph=100|seconds=11.8)])]|" +
-            "make=Honda|model=Civic VTi|activationCode=",
+            "manufacturer=Honda|model=Civic VTi|activationCode=",
             result);
     }
 
@@ -50,7 +65,7 @@ public class ToStringTest extends EncodedCarTestBase
             "(sbeTemplateId=1|sbeSchemaId=1|sbeSchemaVersion=0|sbeBlockLength=45):" +
             "serialNumber=0|modelYear=0|available=F|code=NULL_VAL|someNumbers=[0,0,0,0,0]|vehicleCode=|extras={}|" +
             "engine=(capacity=0|numCylinders=0|manufacturerCode=|)|" +
-            "fuelFigures=[]|performanceFigures=[]|make=|model=|activationCode=",
+            "fuelFigures=[]|performanceFigures=[]|manufacturer=|model=|activationCode=",
             result);
     }
 }

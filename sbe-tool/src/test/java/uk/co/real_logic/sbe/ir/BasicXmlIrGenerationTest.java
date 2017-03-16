@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,8 @@ public class BasicXmlIrGenerationTest
     public void shouldGenerateCorrectIrForMessageWithVariableLengthField()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("basic-variable-length-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "basic-variable-length-schema.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
 
@@ -212,7 +213,8 @@ public class BasicXmlIrGenerationTest
     public void shouldGenerateCorrectIrForMessageWithRepeatingGroupWithEmbeddedDimensions()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("basic-group-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "basic-group-schema.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
 
@@ -246,7 +248,8 @@ public class BasicXmlIrGenerationTest
     public void shouldGenerateCorrectIrForMessageWithRepeatingGroupWithEmbeddedDimensionsDefaultDimensionType()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("embedded-length-and-count-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "embedded-length-and-count-schema.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
 
@@ -272,7 +275,8 @@ public class BasicXmlIrGenerationTest
     public void shouldGenerateCorrectIrForMessageWithVariableLengthFieldWithEmbeddedLength()
         throws Exception
     {
-        final MessageSchema schema = parse(getLocalResource("embedded-length-and-count-schema.xml"), ParserOptions.DEFAULT);
+        final MessageSchema schema = parse(getLocalResource(
+            "embedded-length-and-count-schema.xml"), ParserOptions.DEFAULT);
         final IrGenerator irg = new IrGenerator();
         final Ir ir = irg.generate(schema);
 

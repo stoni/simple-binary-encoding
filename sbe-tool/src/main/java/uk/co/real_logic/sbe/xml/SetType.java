@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,21 +44,22 @@ public class SetType extends Type
     public SetType(final Node node)
         throws XPathExpressionException, IllegalArgumentException
     {
-        this(node, null);
+        this(node, null, null);
     }
 
     /**
      * Construct a new SetType from XML Schema.
      *
-     * @param node      from the XML Schema Parsing
-     * @param givenName for the node.
+     * @param node           from the XML Schema Parsing
+     * @param givenName      for the node.
+     * @param referencedName of the type when created from a ref in a composite.
      * @throws XPathExpressionException on invalid XPath.
      * @throws IllegalArgumentException on illegal encoding type.
      */
-    public SetType(final Node node, final String givenName)
+    public SetType(final Node node, final String givenName, final String referencedName)
         throws XPathExpressionException, IllegalArgumentException
     {
-        super(node, givenName);
+        super(node, givenName, referencedName);
 
         final XPath xPath = XPathFactory.newInstance().newXPath();
         final String encodingTypeStr = getAttributeValue(node, "encodingType");
@@ -185,6 +186,7 @@ public class SetType extends Type
         private final String description;
         private final PrimitiveValue value;
         private final int sinceVersion;
+        private final int deprecated;
 
         /**
          * Construct a Choice given the XML node and the encodingType
@@ -198,6 +200,7 @@ public class SetType extends Type
             description = getAttributeValueOrNull(node, "description");
             value = PrimitiveValue.parse(node.getFirstChild().getNodeValue(), encodingType);
             sinceVersion = Integer.parseInt(getAttributeValue(node, "sinceVersion", "0"));
+            deprecated = Integer.parseInt(getAttributeValue(node, "deprecated", "0"));
 
             // choice values are bit positions (0, 1, 2, 3, 4, etc.) from LSB to MSB
             if (value.longValue() >= (encodingType.size() * 8))
@@ -246,6 +249,17 @@ public class SetType extends Type
         public int sinceVersion()
         {
             return sinceVersion;
+        }
+
+
+        /**
+         * Version in which {@link Choice} was deprecated. Only valid if greater than zero.
+         *
+         * @return version in which the {@link Choice} was deprecated.
+         */
+        public int deprecated()
+        {
+            return deprecated;
         }
     }
 }

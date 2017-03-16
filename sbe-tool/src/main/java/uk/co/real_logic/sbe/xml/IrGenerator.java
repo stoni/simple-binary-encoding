@@ -1,4 +1,4 @@
-/* Copyright 2014 - 2016 Real Logic Ltd.
+/* Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ public class IrGenerator
 {
     private final List<Token> tokenList = new ArrayList<>();
     private ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
-    private int version = 0;
 
     /**
      * Generate a complete {@link uk.co.real_logic.sbe.ir.Ir} for a given schema.
@@ -46,7 +45,13 @@ public class IrGenerator
     {
         final List<Token> headerTokens = generateForHeader(schema);
         final Ir ir = new Ir(
-            schema.packageName(), namespace, schema.id(), schema.version(), schema.semanticVersion(), headerTokens);
+            schema.packageName(),
+            namespace,
+            schema.id(),
+            schema.version(),
+            schema.semanticVersion(),
+            schema.byteOrder(),
+            headerTokens);
 
         for (final Message message : schema.messages())
         {
@@ -72,7 +77,6 @@ public class IrGenerator
     {
         tokenList.clear();
         byteOrder = schema.byteOrder();
-        version = schema.version();
 
         final Message msg = schema.getMessage(messageId);
 
@@ -101,7 +105,8 @@ public class IrGenerator
             .description(msg.description())
             .size(msg.blockLength())
             .id(msg.id())
-            .version(version)
+            .version(msg.sinceVersion())
+            .deprecated(msg.deprecated())
             .encoding(new Encoding.Builder()
                 .semanticType(msg.semanticType())
                 .build())
@@ -143,6 +148,7 @@ public class IrGenerator
             .id(field.id())
             .offset(field.computedOffset())
             .version(field.sinceVersion())
+            .deprecated(field.deprecated())
             .encoding(encodingBuilder.build())
             .build();
 
@@ -203,9 +209,11 @@ public class IrGenerator
         final Token.Builder builder = new Token.Builder()
             .signal(Signal.BEGIN_COMPOSITE)
             .name(type.name())
+            .referencedName(type.referencedName())
             .offset(currOffset)
             .size(type.encodedLength())
             .version(type.sinceVersion())
+            .deprecated(type.deprecated())
             .description(type.description())
             .encoding(new Encoding.Builder()
                 .semanticType(semanticTypeOf(type, field))
@@ -214,6 +222,7 @@ public class IrGenerator
         if (field != null)
         {
             builder.version(field.sinceVersion());
+            builder.deprecated(field.deprecated());
             builder.description(field.description());
         }
 
@@ -266,15 +275,18 @@ public class IrGenerator
         final Token.Builder builder = new Token.Builder()
             .signal(Signal.BEGIN_ENUM)
             .name(type.name())
+            .referencedName(type.referencedName())
             .size(encodingType.size())
             .offset(offset)
             .version(type.sinceVersion())
+            .deprecated(type.deprecated())
             .description(type.description())
             .encoding(encodingBuilder.build());
 
         if (field != null)
         {
             builder.version(field.sinceVersion());
+            builder.deprecated(field.deprecated());
             builder.description(field.description());
         }
 
@@ -296,6 +308,7 @@ public class IrGenerator
             .signal(Signal.VALID_VALUE)
             .name(value.name())
             .version(value.sinceVersion())
+            .deprecated(value.deprecated())
             .description(value.description())
             .encoding(new Encoding.Builder()
                 .byteOrder(byteOrder)
@@ -313,9 +326,11 @@ public class IrGenerator
         final Token.Builder builder = new Token.Builder()
             .signal(Signal.BEGIN_SET)
             .name(type.name())
+            .referencedName(type.referencedName())
             .size(encodingType.size())
             .offset(offset)
             .version(type.sinceVersion())
+            .deprecated(type.deprecated())
             .description(type.description())
             .encoding(new Encoding.Builder()
                 .semanticType(semanticTypeOf(type, field))
@@ -325,6 +340,7 @@ public class IrGenerator
         if (field != null)
         {
             builder.version(field.sinceVersion());
+            builder.deprecated(field.deprecated());
             builder.description(field.description());
         }
 
@@ -347,6 +363,7 @@ public class IrGenerator
             .name(value.name())
             .description(value.description())
             .version(value.sinceVersion())
+            .deprecated(value.deprecated())
             .encoding(new Encoding.Builder()
                 .constValue(value.primitiveValue())
                 .byteOrder(byteOrder)
@@ -373,14 +390,17 @@ public class IrGenerator
         final Token.Builder tokenBuilder = new Token.Builder()
             .signal(Signal.ENCODING)
             .name(type.name())
+            .referencedName(type.referencedName())
             .size(type.encodedLength())
             .description(type.description())
             .version(type.sinceVersion())
+            .deprecated(type.deprecated())
             .offset(offset);
 
         if (field != null && !(field.type() instanceof CompositeType))
         {
             tokenBuilder.version(field.sinceVersion());
+            tokenBuilder.deprecated(field.deprecated());
             tokenBuilder.description(field.description());
         }
 

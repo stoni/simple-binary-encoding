@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,11 @@ public abstract class AbstractTokenListener implements TokenListener
     }
 
     public void onEncoding(
-        final Token fieldToken, final DirectBuffer buffer, final int bufferIndex, final Token typeToken, final int actingVersion)
+        final Token fieldToken,
+        final DirectBuffer buffer,
+        final int bufferIndex,
+        final Token typeToken,
+        final int actingVersion)
     {
         // no op
     }
@@ -68,17 +72,19 @@ public abstract class AbstractTokenListener implements TokenListener
         // no op
     }
 
-    public void onBeginComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
+    public void onBeginComposite(
+        final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
     {
         // no op
     }
 
-    public void onEndComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
+    public void onEndComposite(
+        final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
     {
         // no op
     }
 
-    public void onGroupHeader(Token token, int numInGroup)
+    public void onGroupHeader(final Token token, final int numInGroup)
     {
         // no op
     }
@@ -94,7 +100,11 @@ public abstract class AbstractTokenListener implements TokenListener
     }
 
     public void onVarData(
-        final Token fieldToken, final DirectBuffer buffer, final int bufferIndex, final int length, final Token typeToken)
+        final Token fieldToken,
+        final DirectBuffer buffer,
+        final int bufferIndex,
+        final int length,
+        final Token typeToken)
     {
         // no op
     }

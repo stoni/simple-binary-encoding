@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class CompositeType extends Type
 
     public CompositeType(final Node node) throws XPathExpressionException
     {
-        this(node, null, new ArrayList<>());
+        this(node, null, null, new ArrayList<>());
     }
 
     /**
@@ -56,13 +56,15 @@ public class CompositeType extends Type
      *
      * @param node           from the XML Schema Parsing
      * @param givenName      for this node.
+     * @param referencedName of the type when created from a ref in a composite.
      * @param compositesPath with the path of composites that represents the levels of composition.
      * @throws XPathExpressionException if the XPath is invalid.
      */
-    public CompositeType(final Node node, final String givenName, final List<String> compositesPath)
+    public CompositeType(
+        final Node node, final String givenName, final String referencedName, final List<String> compositesPath)
         throws XPathExpressionException
     {
-        super(node, givenName);
+        super(node, givenName, referencedName);
 
         this.compositesPath.addAll(compositesPath);
         this.compositesPath.add(getAttributeValue(node, "name"));
@@ -75,7 +77,7 @@ public class CompositeType extends Type
             final Node subTypeNode = list.item(i);
             final String subTypeName = XmlSchemaParser.getAttributeValue(subTypeNode, "name");
 
-            processType(subTypeNode, subTypeName, null);
+            processType(subTypeNode, subTypeName, null, null);
         }
 
         checkForValidOffsets(node);
@@ -226,7 +228,8 @@ public class CompositeType extends Type
 
         if ("optional".equals(getAttributeValueOrNull(node, "presence")))
         {
-            XmlSchemaParser.handleError(node, "composite for variable length data encoding cannot have presence=\"optional\"");
+            XmlSchemaParser.handleError(
+                node, "composite for variable length data encoding cannot have presence=\"optional\"");
         }
 
         if (containedTypeByNameMap.get("varData") == null)
@@ -235,7 +238,8 @@ public class CompositeType extends Type
         }
     }
 
-    private static void validateMaxValue(final Node node, final PrimitiveType primitiveType, final PrimitiveValue value)
+    private static void validateMaxValue(
+        final Node node, final PrimitiveType primitiveType, final PrimitiveValue value)
     {
         if (null != value)
         {
@@ -350,7 +354,8 @@ public class CompositeType extends Type
         return false;
     }
 
-    private Type processType(final Node subTypeNode, final String subTypeName, final String givenName)
+    private Type processType(
+        final Node subTypeNode, final String subTypeName, final String givenName, final String referencedName)
         throws XPathExpressionException
     {
         final String nodeName = subTypeNode.getNodeName();
@@ -363,15 +368,18 @@ public class CompositeType extends Type
                 break;
 
             case "enum":
-                type = addType(subTypeNode, subTypeName, new EnumType(subTypeNode, givenName));
+                type = addType(subTypeNode, subTypeName, new EnumType(subTypeNode, givenName, referencedName));
                 break;
 
             case "set":
-                type = addType(subTypeNode, subTypeName, new SetType(subTypeNode, givenName));
+                type = addType(subTypeNode, subTypeName, new SetType(subTypeNode, givenName, referencedName));
                 break;
 
             case "composite":
-                type = addType(subTypeNode, subTypeName, new CompositeType(subTypeNode, givenName, compositesPath));
+                type = addType(
+                    subTypeNode,
+                    subTypeName,
+                    new CompositeType(subTypeNode, givenName, referencedName, compositesPath));
                 break;
 
             case "ref":
@@ -379,24 +387,24 @@ public class CompositeType extends Type
                 final XPath xPath = XPathFactory.newInstance().newXPath();
 
                 final String refName = XmlSchemaParser.getAttributeValue(subTypeNode, "name");
-                final String refType = XmlSchemaParser.getAttributeValue(subTypeNode, "type");
+                final String refTypeName = XmlSchemaParser.getAttributeValue(subTypeNode, "type");
                 final int refOffset = Integer.parseInt(XmlSchemaParser.getAttributeValue(subTypeNode, "offset", "-1"));
-                final Node refTypeNode = (Node)xPath.compile("/messageSchema/types/*[@name='" + refType + "']")
+                final Node refTypeNode = (Node)xPath.compile("/messageSchema/types/*[@name='" + refTypeName + "']")
                     .evaluate(subTypeNode.getOwnerDocument(), XPathConstants.NODE);
 
                 if (refTypeNode == null)
                 {
-                    XmlSchemaParser.handleError(subTypeNode, "ref type not found: " + refType);
+                    XmlSchemaParser.handleError(subTypeNode, "ref type not found: " + refTypeName);
                 }
                 else
                 {
-                    if (compositesPath.contains(refType))
+                    if (compositesPath.contains(refTypeName))
                     {
                         XmlSchemaParser.handleError(refTypeNode, "ref types cannot create circular dependencies.");
                         throw new IllegalStateException("ref types cannot create circular dependencies");
                     }
 
-                    type = processType(refTypeNode, refName, refName);
+                    type = processType(refTypeNode, refName, refName, refTypeName);
 
                     if (-1 != refOffset)
                     {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ public class Message
     private final int id;
     private final String name;
     private final String description;
+    private final int sinceVersion;
+    private final int deprecated;
     private final int blockLength;
     private final List<Field> fieldList;
     private final String semanticType;
@@ -67,6 +69,8 @@ public class Message
         name = getAttributeValue(messageNode, "name");                                      // required
         description = getAttributeValueOrNull(messageNode, "description");                  // optional
         blockLength = Integer.parseInt(getAttributeValue(messageNode, "blockLength", "0")); // 0 means not set
+        sinceVersion = Integer.parseInt(getAttributeValue(messageNode, "sinceVersion", "0"));
+        deprecated = Integer.parseInt(getAttributeValue(messageNode, "deprecated", "0"));
         semanticType = getAttributeValueOrNull(messageNode, "semanticType");                // optional
         this.typeByNameMap = typeByNameMap;
 
@@ -115,6 +119,26 @@ public class Message
     public String semanticType()
     {
         return semanticType;
+    }
+
+    /**
+     * The version since this was added to the template.
+     *
+     * @return version since this was added to the template.
+     */
+    public int sinceVersion()
+    {
+        return sinceVersion;
+    }
+
+    /**
+     * Version in which message was deprecated. Only valid if greater than zero.
+     *
+     * @return version in which the message was deprecated.
+     */
+    public int deprecated()
+    {
+        return deprecated;
     }
 
     /**
@@ -211,6 +235,7 @@ public class Message
             .id(Integer.parseInt(getAttributeValue(node, "id")))
             .blockLength(Integer.parseInt(getAttributeValue(node, "blockLength", "0")))
             .sinceVersion(Integer.parseInt(getAttributeValue(node, "sinceVersion", "0")))
+            .deprecated(Integer.parseInt(getAttributeValue(node, "deprecated", "0")))
             .dimensionType((CompositeType)dimensionType)
             .build();
 
@@ -240,6 +265,7 @@ public class Message
             .presence(Presence.get(getAttributeValue(node, "presence", "required")))
             .valueRef(getAttributeValueOrNull(node, "valueRef"))
             .sinceVersion(Integer.parseInt(getAttributeValue(node, "sinceVersion", "0")))
+            .deprecated(Integer.parseInt(getAttributeValue(node, "deprecated", "0")))
             .epoch(getAttributeValue(node, "epoch", "unix"))
             .timeUnit(getAttributeValue(node, "timeUnit", "nanosecond"))
             .type(fieldType)
@@ -277,6 +303,7 @@ public class Message
             .semanticType(getAttributeValueOrNull(node, "semanticType"))
             .presence(Presence.get(getAttributeValue(node, "presence", "required")))
             .sinceVersion(Integer.parseInt(getAttributeValue(node, "sinceVersion", "0")))
+            .deprecated(Integer.parseInt(getAttributeValue(node, "deprecated", "0")))
             .epoch(getAttributeValue(node, "epoch", "unix"))
             .timeUnit(getAttributeValue(node, "timeUnit", "nanosecond"))
             .type(fieldType)
@@ -290,8 +317,8 @@ public class Message
 
     /*
      * Compute and validate the offsets of the fields in the list and will set the fields computedOffset.
-     * Will validate the blockLength of the fields encompassing &lt;message&gt; or &lt;group&gt; and recursively descend
-     * into repeated groups.
+     * Will validate the blockLength of the fields encompassing &lt;message&gt; or &lt;group&gt; and recursively
+     * descend into repeated groups.
      */
     private int computeAndValidateOffsets(final Node node, final List<Field> fields, final int blockLength)
     {
@@ -377,13 +404,15 @@ public class Message
         return blockLength;
     }
 
-    private static void validateBlockLength(final Node node, final long specifiedBlockLength, final long computedBlockLength)
+    private static void validateBlockLength(
+        final Node node, final long specifiedBlockLength, final long computedBlockLength)
     {
         if (0 != specifiedBlockLength && computedBlockLength > specifiedBlockLength)
         {
             handleError(
                 node,
-                "specified blockLength provides insufficient space " + computedBlockLength + " > " + specifiedBlockLength);
+                "specified blockLength provides insufficient space " +
+                    computedBlockLength + " > " + specifiedBlockLength);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ public final class ReflectionUtil
         return object.getClass().getMethod(fieldName).invoke(object);
     }
 
-    static String getMake(final Object decoder) throws Exception
+    static String getManufacturer(final Object decoder) throws Exception
     {
-        return (String)get(decoder, "make");
+        return (String)get(decoder, "manufacturer");
     }
 
-    static void setMake(final Object encoder,
+    static void setManufacturer(final Object encoder,
         final String value) throws Exception
     {
-        encoder.getClass().getMethod("make", String.class).invoke(encoder, value);
+        encoder.getClass().getMethod("manufacturer", String.class).invoke(encoder, value);
     }
 
     static void putSerialNumber(final Object encoder, final long serial) throws Exception
@@ -86,7 +86,7 @@ public final class ReflectionUtil
         return getInt(flyweight, "capacity");
     }
 
-    public static void setCapacity(final Object flyweight, int value) throws Exception
+    public static void setCapacity(final Object flyweight, final int value) throws Exception
     {
         flyweight
             .getClass()
@@ -108,17 +108,17 @@ public final class ReflectionUtil
         return clazz.getDeclaredMethod("get", byte.class).invoke(null, value);
     }
 
-    static Object getFuelFigures(Object msgFlyweight) throws Exception
+    static Object getFuelFigures(final Object msgFlyweight) throws Exception
     {
         return get(msgFlyweight, "fuelFigures");
     }
 
-    static Object fuelFiguresCount(Object msgFlyweight, int count) throws Exception
+    static Object fuelFiguresCount(final Object msgFlyweight, final int count) throws Exception
     {
         return msgFlyweight.getClass().getMethod("fuelFiguresCount", int.class).invoke(msgFlyweight, count);
     }
 
-    static int getCount(Object groupFlyweight) throws Exception
+    static int getCount(final Object groupFlyweight) throws Exception
     {
         return getInt(groupFlyweight, "count");
     }

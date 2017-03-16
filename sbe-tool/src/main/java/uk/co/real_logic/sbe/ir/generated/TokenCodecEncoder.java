@@ -8,7 +8,7 @@ import org.agrona.DirectBuffer;
 @SuppressWarnings("all")
 public class TokenCodecEncoder
 {
-    public static final int BLOCK_LENGTH = 24;
+    public static final int BLOCK_LENGTH = 28;
     public static final int TEMPLATE_ID = 2;
     public static final int SCHEMA_ID = 1;
     public static final int SCHEMA_VERSION = 0;
@@ -300,6 +300,38 @@ public class TokenCodecEncoder
         buffer.putByte(offset + 23, (byte)value.value());
         return this;
     }
+
+    public static int deprecatedEncodingOffset()
+    {
+        return 24;
+    }
+
+    public static int deprecatedEncodingLength()
+    {
+        return 4;
+    }
+
+    public static int deprecatedNullValue()
+    {
+        return 0;
+    }
+
+    public static int deprecatedMinValue()
+    {
+        return -2147483647;
+    }
+
+    public static int deprecatedMaxValue()
+    {
+        return 2147483647;
+    }
+
+    public TokenCodecEncoder deprecated(final int value)
+    {
+        buffer.putInt(offset + 24, value, java.nio.ByteOrder.LITTLE_ENDIAN);
+        return this;
+    }
+
 
     public static int nameId()
     {
@@ -1135,6 +1167,92 @@ public class TokenCodecEncoder
     }
 
     public TokenCodecEncoder description(final String value)
+    {
+        final byte[] bytes;
+        try
+        {
+            bytes = value.getBytes("UTF-8");
+        }
+        catch (final java.io.UnsupportedEncodingException ex)
+        {
+            throw new RuntimeException(ex);
+        }
+
+        final int length = bytes.length;
+        if (length > 65534)
+        {
+            throw new IllegalArgumentException("length > max value for type: " + length);
+        }
+
+        final int headerLength = 2;
+        final int limit = parentMessage.limit();
+        parentMessage.limit(limit + headerLength + length);
+        buffer.putShort(limit, (short)length, java.nio.ByteOrder.LITTLE_ENDIAN);
+        buffer.putBytes(limit + headerLength, bytes, 0, length);
+
+        return this;
+    }
+
+    public static int referencedNameId()
+    {
+        return 30;
+    }
+
+    public static String referencedNameCharacterEncoding()
+    {
+        return "UTF-8";
+    }
+
+    public static String referencedNameMetaAttribute(final MetaAttribute metaAttribute)
+    {
+        switch (metaAttribute)
+        {
+            case EPOCH: return "unix";
+            case TIME_UNIT: return "nanosecond";
+            case SEMANTIC_TYPE: return "";
+        }
+
+        return "";
+    }
+
+    public static int referencedNameHeaderLength()
+    {
+        return 2;
+    }
+
+    public TokenCodecEncoder putReferencedName(final DirectBuffer src, final int srcOffset, final int length)
+    {
+        if (length > 65534)
+        {
+            throw new IllegalArgumentException("length > max value for type: " + length);
+        }
+
+        final int headerLength = 2;
+        final int limit = parentMessage.limit();
+        parentMessage.limit(limit + headerLength + length);
+        buffer.putShort(limit, (short)length, java.nio.ByteOrder.LITTLE_ENDIAN);
+        buffer.putBytes(limit + headerLength, src, srcOffset, length);
+
+        return this;
+    }
+
+    public TokenCodecEncoder putReferencedName(final byte[] src, final int srcOffset, final int length)
+    {
+        if (length > 65534)
+        {
+            throw new IllegalArgumentException("length > max value for type: " + length);
+        }
+
+        final int headerLength = 2;
+        final int limit = parentMessage.limit();
+        parentMessage.limit(limit + headerLength + length);
+        buffer.putShort(limit, (short)length, java.nio.ByteOrder.LITTLE_ENDIAN);
+        buffer.putBytes(limit + headerLength, src, srcOffset, length);
+
+        return this;
+    }
+
+    public TokenCodecEncoder referencedName(final String value)
     {
         final byte[] bytes;
         try

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Real Logic Ltd.
+ * Copyright 2013-2017 Real Logic Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,11 +85,6 @@ def projectPom = {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2.1'
-    distributionType = 'ALL'
-}
-
 configurations {
     shadow
 }
@@ -116,32 +111,23 @@ subprojects {
     [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:7.3'
-        checkstyle 'com.github.sevntu.checkstyle:sevntu-checks:1.22.0'
+        checkstyle 'com.puppycrawl.tools:checkstyle:7.6'
+        checkstyle 'com.github.sevntu.checkstyle:sevntu-checks:1.23.1'
 
         testCompile 'org.hamcrest:hamcrest-all:1.3'
         testCompile 'junit:junit:4.12'
-        testCompile 'org.mockito:mockito-core:2.2.29'
+        testCompile 'org.mockito:mockito-core:2.7.17'
         testCompile 'com.google.code.gson:gson:2.8.0'
     }
 
     checkstyle {
-        configFile = new File(rootDir, 'config/checkstyle.xml')
-        toolVersion = '7.3'
+        configFile = new File(rootDir, 'config/checkstyle/checkstyle.xml')
+        toolVersion = '7.6'
     }
 
     compileJava {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
-    }
-
-    tasks.withType(JavaCompile) {
-        // Suppress warnings about using Unsafe and sun.misc
-        options.compilerArgs << '-XDignore.symbol.file' << '-Xlint:unchecked'
-        options.debug = true
-        options.fork = true
-        options.forkOptions.executable = 'javac'
-        options.warnings = false
     }
 
     test {
@@ -153,7 +139,7 @@ subprojects {
 
     javadoc {
         title = '<h1>Simple Binary Encoding</h1>'
-        options.bottom = '<i>Copyright &#169; 2014 - 2016 Real Logic Ltd. All Rights Reserved.</i>'
+        options.bottom = '<i>Copyright &#169; 2014-2017 Real Logic Ltd. All Rights Reserved.</i>'
     }
 
     signing {
@@ -171,7 +157,7 @@ def validationXsdPath = project(':sbe-tool').projectDir.toString() + '/src/main/
 
 project(':sbe-tool') {
     dependencies {
-        compile 'org.agrona:Agrona:0.9.1'
+        compile 'org.agrona:agrona:0.9.3'
 
         testCompile files('build/classes/generated')
     }
@@ -390,8 +376,8 @@ project(':sbe-benchmarks') {
 
     dependencies {
         compile project(':sbe-tool')
-        compile 'org.openjdk.jmh:jmh-core:1.17.3'
-        compile 'org.openjdk.jmh:jmh-generator-annprocess:1.17.3'
+        compile 'org.openjdk.jmh:jmh-core:1.18'
+        compile 'org.openjdk.jmh:jmh-generator-annprocess:1.18'
         compile files('build/classes/generated')
     }
 
@@ -459,6 +445,78 @@ project(':sbe-benchmarks') {
     }
 }
 
+/*
+ * Golang codec targets used for testing, benchmarking etc. We have
+ * multiple targets as:
+ *  *) some of the test files generate warnings from the xsd so we don't
+ *     validate those.
+ *  *) Some of the test files need an additional output directory setting
+ *     as they generate into the same directory and golang won't allow that.
+ */
+task(generateGolangCodecTestComposite, type:JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'gocode/src',
+        'sbe.target.language': 'golang')
+    args = [ 'sbe-tool/src/test/resources/composite-elements-schema-rc4.xml' ]
+}
+
+task(generateGolangCodecTestBasic, type:JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'gocode/src/basic',
+        'sbe.target.language': 'golang')
+    args = [ 'sbe-tool/src/test/resources/basic-types-schema.xml' ]
+}
+
+task(generateGolangCodecTestGroup, type:JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'gocode/src/group',
+        'sbe.target.language': 'golang')
+    args = [ 'sbe-tool/src/test/resources/basic-group-schema.xml' ]
+}
+
+task(generateGolangCodecTestVarData, type:JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'gocode/src/vardata',
+        'sbe.target.language': 'golang')
+    args = [ 'sbe-tool/src/test/resources/basic-variable-length-schema.xml' ]
+}
+
+task(generateGolangCodecsWithXSD, type:JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'gocode/src',
+        'sbe.target.language': 'golang',
+        'sbe.validation.xsd': validationXsdPath)
+    args = [ 'sbe-tool/src/test/resources/group-with-data-schema.xml',
+             'sbe-tool/src/test/resources/FixBinary.xml',
+             'gocode/resources/example-bigendian.xml',
+             'gocode/resources/example-composite.xml',
+             'gocode/resources/example-extension-2-schema.xml',
+             'gocode/resources/group-with-data-extension-schema.xml',
+             'gocode/resources/simple.xml',
+             'gocode/resources/issue435.xml',
+             'sbe-samples/src/main/resources/example-schema.xml',
+             'sbe-samples/src/main/resources/example-extension-schema.xml' ]
+}
+
+task generateGolangCodecs {
+    description = 'Generate golang test codecs'
+    dependsOn 'generateGolangCodecTestVarData',
+        'generateGolangCodecTestGroup',
+        'generateGolangCodecTestBasic',
+        'generateGolangCodecTestComposite',
+        'generateGolangCodecsWithXSD'
+}
+
 task(generateJavaIrCodecs, type: JavaExec) {
     main = 'uk.co.real_logic.sbe.SbeTool'
     classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
@@ -479,9 +537,19 @@ task(generateCppIrCodecs, type: JavaExec) {
     args = ['sbe-tool/src/main/resources/sbe-ir.xml']
 }
 
+task(generateGolangIrCodecs, type: JavaExec) {
+    main = 'uk.co.real_logic.sbe.SbeTool'
+    classpath = project(':sbe-all').sourceSets.main.runtimeClasspath
+    systemProperties(
+        'sbe.output.dir': 'sbe-tool/src/main/golang',
+        'sbe.target.language': 'golang',
+        'sbe.validation.xsd': validationXsdPath)
+    args = ['sbe-tool/src/main/resources/sbe-ir.xml']
+}
+
 task generateIrCodecs {
-    description = 'Generate Java and C++ IR Codecs'
-    dependsOn 'generateJavaIrCodecs', 'generateCppIrCodecs'
+    description = 'Generate Java, C++, and golang IR Codecs'
+    dependsOn 'generateJavaIrCodecs', 'generateCppIrCodecs', 'generateGolangIrCodecs'
 }
 
 task runBenchmarks(type: Exec) {
@@ -494,4 +562,9 @@ task runBenchmarks(type: Exec) {
 task uploadToMavenCentral {
     dependsOn 'sbe-tool:uploadArchives', 'sbe-samples:uploadArchives', 'sbe-benchmarks:uploadArchives',
             'sbe-all:uploadArchives', 'sbe-all:uploadShadow'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
+    distributionType = 'ALL'
 }
