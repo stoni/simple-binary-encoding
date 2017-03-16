@@ -16,6 +16,7 @@
 package uk.co.real_logic.sbe.generation.c;
 
 import static uk.co.real_logic.sbe.generation.c.CUtil.cTypeName;
+import static uk.co.real_logic.sbe.generation.c.CUtil.formatStructName;
 import static uk.co.real_logic.sbe.generation.c.CUtil.dotsToUnderscore;
 import static uk.co.real_logic.sbe.generation.c.CUtil.fromCamelCaseToUnderscore;
 import static uk.co.real_logic.sbe.generation.c.CUtil.whitespaces;
@@ -236,18 +237,62 @@ public class CGenerator implements CodeGenerator
 	    sb.append(NEWLINE);
 	}
 	
+	public void generateEnum(final StringBuilder sb, final List<Token> tokens, final Token enumToken)
+	{
+		final List<Token> subTokens = tokens.subList(1, tokens.size() - 1);
+		final String enumName = tokens.get(0).name();
+
+        sb.append("typedef enum sbe_");
+        sb.append(fromCamelCaseToUnderscore(enumName));
+        sb.append("_e {\n");
+
+        for (final Token token : subTokens)
+        {
+            sb.append(INDENT).append("SBE_").append(fromCamelCaseToUnderscore(enumName).toUpperCase());
+            sb.append("_").append(token.name()).append(" = ");
+            sb.append(token.encoding().constValue().toString()).append(",\n");
+        }
+
+        sb.append("} sbe_").append(fromCamelCaseToUnderscore(enumName)).append("_t;\n\n");
+	}
+	
 	public void generateMessage(final StringBuilder sb, final String messageName, Token msgToken, List<Token> msgFields)
 	{
 		final String structName = fromCamelCaseToUnderscore(messageName);
 		sb.append(String.format("typedef struct sbe_%1$s_s {\n", structName));
-		for (Token t : msgFields)
+		for (int i = 0, size = msgFields.size(); i < size; i++)
 		{
-			if (t.signal() == Signal.ENCODING)
+			final Token t = msgFields.get(i);
+			if (t.signal() == Signal.BEGIN_FIELD && !t.isConstantEncoding())
 			{
+				final Token encodingToken = msgFields.get(i + 1);
 				sb.append(INDENT);
-				sb.append(cTypeName(t.encoding().primitiveType()));
+				switch (encodingToken.signal())
+                {
+                    case ENCODING:
+                    	sb.append(cTypeName(encodingToken.encoding().primitiveType()));
+                        break;
+
+                    case BEGIN_ENUM:
+                    	sb.append(cTypeName(encodingToken.encoding().primitiveType()));
+                        break;
+
+                    case BEGIN_SET:
+                    	sb.append(formatStructName(encodingToken.name()));
+                        break;
+
+                    case BEGIN_COMPOSITE:
+                    	sb.append(formatStructName(encodingToken.name()));
+                        break;
+                    default:
+                    	break;
+                }
 				sb.append(" ");
 				sb.append(fromCamelCaseToUnderscore(t.name()));
+				if (encodingToken.encoding().primitiveType() != null && 
+						encodingToken.encodedLength() != encodingToken.encoding().primitiveType().size()) {
+            		sb.append("["+encodingToken.encodedLength()+"]");
+            	}
 				sb.append(";");
 				sb.append(NEWLINE);
 			}
@@ -270,6 +315,28 @@ public class CGenerator implements CodeGenerator
 			
 			sb.append(NEWLINE);
 			
+			for (final List<Token> tokens : ir.types())
+	        {
+	            switch (tokens.get(0).signal())
+	            {
+	                case BEGIN_ENUM:
+	                	final Token enumToken = tokens.get(0);
+	                    generateEnum(sb, tokens, enumToken);
+	                    break;
+
+	                case BEGIN_SET:
+	                    //generateChoiceSet(tokens);
+	                    break;
+
+	                case BEGIN_COMPOSITE:
+	                    //generateComposite(tokens);
+	                    break;
+	                    
+	                default:
+	                	break;
+	            }
+	        }
+			
 			for (final List<Token> tokens : ir.messages())
 	        {
 	            final Token msgToken = tokens.get(0);
@@ -287,7 +354,6 @@ public class CGenerator implements CodeGenerator
                 final List<Token> varData = new ArrayList<>();
                 collectVarData(messageBody, i, varData);
 	            
-	            sb.append(messageName);
 	            sb.append(NEWLINE);
 	            generateMessage(sb, messageName, msgToken, fields);
 	            sb.append(NEWLINE);

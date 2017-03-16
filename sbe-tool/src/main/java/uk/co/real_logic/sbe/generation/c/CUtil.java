@@ -91,10 +91,12 @@ public class CUtil
         {
             if (Character.isUpperCase(str.charAt(i)))
             {
-                if (i > 0)
-                {
-                    tmp.append('_');
-                }
+            	if (i >= 1 && !Character.isUpperCase(str.charAt(i-1))) {
+	                if (i > 0)
+	                {
+	                    tmp.append('_');
+	                }
+            	}
                 tmp.append(Character.toLowerCase(str.charAt(i)));
             }
             else
